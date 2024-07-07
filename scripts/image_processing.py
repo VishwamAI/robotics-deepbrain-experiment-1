@@ -45,21 +45,18 @@ def display_image(image, window_name="Image"):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-def generate_hologram(image, model_output):
+def generate_hologram(image, position, intensity):
     """
     Generate a 2D imagination hologram based on the model output.
 
     Args:
     image (np.ndarray): Input image.
-    model_output (dict): Output from the neural network model with keys 'position' and 'intensity'.
+    position (np.ndarray): Position array from the neural network model.
+    intensity (np.ndarray): Intensity array from the neural network model.
 
     Returns:
     np.ndarray: Generated hologram image.
     """
-    # Extract position and intensity from the model output dictionary
-    position = model_output['position']
-    intensity = model_output['intensity']
-
     # Create a blank canvas for the hologram
     hologram = np.zeros_like(image)
 
@@ -87,11 +84,9 @@ if __name__ == "__main__":
     display_image(preprocessed_image)
 
     # Example model output (random values for demonstration)
-    model_output = {
-        "position": np.random.rand(2),
-        "intensity": np.random.rand()
-    }
+    position = np.random.rand(2)
+    intensity = np.random.rand()
 
     # Generate and display the hologram
-    hologram = generate_hologram(preprocessed_image, model_output)
+    hologram = generate_hologram(preprocessed_image, position, intensity)
     display_image(hologram, window_name="Hologram")
