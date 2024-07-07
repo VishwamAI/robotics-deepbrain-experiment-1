@@ -45,9 +45,50 @@ def display_image(image, window_name="Image"):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+def generate_hologram(image, model_output):
+    """
+    Generate a 2D imagination hologram based on the model output.
+
+    Args:
+    image (np.ndarray): Input image.
+    model_output (np.ndarray): Output from the neural network model.
+
+    Returns:
+    np.ndarray: Generated hologram image.
+    """
+    # Advanced implementation: Modify the image based on model output
+    # Assume model_output contains 3 values: [position, intensity, shape]
+    position, intensity, shape = model_output
+
+    # Create a blank canvas for the hologram
+    hologram = np.zeros_like(image)
+
+    # Define the center position for the hologram
+    center_x = int(position[0] * image.shape[1])
+    center_y = int(position[1] * image.shape[0])
+
+    # Define the radius and intensity for the hologram
+    radius = int(shape * min(image.shape[:2]) / 2)
+    intensity = np.clip(intensity, 0, 1)
+
+    # Draw the hologram on the canvas
+    cv2.circle(hologram, (center_x, center_y), radius, (intensity, intensity, intensity), -1)
+
+    # Combine the hologram with the original image
+    combined_image = cv2.addWeighted(image, 0.5, hologram, 0.5, 0)
+
+    return combined_image
+
 if __name__ == "__main__":
     # Example usage
     image_path = "path/to/your/image.jpg"
     image = load_image(image_path)
     preprocessed_image = preprocess_image(image)
     display_image(preprocessed_image)
+
+    # Example model output (random values for demonstration)
+    model_output = [np.random.rand(2), np.random.rand(), np.random.rand()]
+
+    # Generate and display the hologram
+    hologram = generate_hologram(preprocessed_image, model_output)
+    display_image(hologram, window_name="Hologram")
