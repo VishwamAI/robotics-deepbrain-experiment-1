@@ -67,7 +67,7 @@ def load_preprocessed_data(file_path):
 
     return data
 
-def train_model(model, data, labels, epochs=10, batch_size=32):
+def train_model(model, data, labels, epochs=10, batch_size=32, validation_split=0.2):
     """
     Train the deep learning model.
 
@@ -77,6 +77,7 @@ def train_model(model, data, labels, epochs=10, batch_size=32):
     labels (dict): Training labels with keys 'position', 'intensity', and 'shape'.
     epochs (int): Number of training epochs.
     batch_size (int): Batch size for training.
+    validation_split (float): Fraction of the training data to be used as validation data.
 
     Returns:
     tf.keras.callbacks.History: Training history.
@@ -84,7 +85,11 @@ def train_model(model, data, labels, epochs=10, batch_size=32):
     # Combine the labels into a single array for training
     combined_labels = np.hstack((labels['position'], labels['intensity'].reshape(-1, 1), labels['shape'].reshape(-1, 1)))
 
-    history = model.fit(data, combined_labels, epochs=epochs, batch_size=batch_size, validation_split=0.2)
+    if validation_split > 0.0:
+        history = model.fit(data, combined_labels, epochs=epochs, batch_size=batch_size, validation_split=validation_split)
+    else:
+        history = model.fit(data, combined_labels, epochs=epochs, batch_size=batch_size)
+
     return history
 
 def predict(model, data):
