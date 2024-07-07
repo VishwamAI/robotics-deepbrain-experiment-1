@@ -17,11 +17,13 @@ sample_file = 'SUB_001_SIG_01.csv'
 file_path = os.path.join(csv_dir, sample_file)
 data = load_preprocessed_data(file_path)
 
-# Example labels (3 values for hologram generation)
+# Reshape data to match the model's expected input shape
+data = data.reshape((1, 19679, 64))
+
+# Example labels (2 values for hologram generation)
 labels = {
-    "position": np.random.rand(data.shape[0], 2),
-    "intensity": np.random.rand(data.shape[0]),
-    "shape": np.ones(data.shape[0])  # Assuming shape is constant for simplicity
+    "position": np.random.rand(2),  # Ensure position is a 1D array with shape (2,)
+    "intensity": np.random.rand(1)
 }
 
 # Train the model
