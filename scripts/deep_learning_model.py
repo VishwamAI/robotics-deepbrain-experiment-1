@@ -36,10 +36,10 @@ def create_deep_learning_model(input_shape):
     # Fully connected layers for final prediction
     model.add(Dense(100, activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(1, activation='sigmoid'))
+    model.add(Dense(3, activation='sigmoid'))  # Change output layer to produce 3 values
 
     # Compile the model
-    model.compile(optimizer=Adam(learning_rate=0.001), loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error', metrics=['accuracy'])
 
     return model
 
@@ -99,8 +99,8 @@ if __name__ == "__main__":
     file_path = os.path.join(csv_dir, sample_file)
     data = load_preprocessed_data(file_path)
 
-    # Example labels (binary classification)
-    labels = np.random.randint(2, size=(data.shape[0],))
+    # Example labels (3 values for hologram generation)
+    labels = np.random.rand(data.shape[0], 3)
 
     # Train the model
     history = train_model(model, data, labels)
