@@ -57,6 +57,10 @@ def generate_hologram(image, position, intensity):
     Returns:
     np.ndarray: Generated hologram image.
     """
+    # Ensure position is a flat array with exactly two elements
+    if position.ndim > 1:
+        position = position.flatten()[:2]
+
     # Create a blank canvas for the hologram
     hologram = np.zeros_like(image)
 
