@@ -34,7 +34,7 @@ def reduce_dimensionality(df, n_components=10):
     reduced_data = pca.fit_transform(df)
     return pd.DataFrame(reduced_data)
 
-def segment_data(df, window_size=256, step_size=128):
+def segment_data(df, window_size=128, step_size=64):
     """
     Segment the data into smaller time windows.
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
             print("Reduced Dimensionality Data:\n", reduced_df.head())
 
             # Segment the data
-            segments = segment_data(normalized_df)
+            segments = segment_data(normalized_df, window_size=128, step_size=64)
             print("Number of Segments:", len(segments))
             print("First Segment:\n", segments[0])
 

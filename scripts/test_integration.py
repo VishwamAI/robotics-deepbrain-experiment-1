@@ -6,7 +6,7 @@ from image_processing import load_image, preprocess_image, generate_hologram, di
 from data_preprocessing import load_csv_data_in_chunks, normalize_data, segment_data
 
 # Create the deep learning model
-model = create_deep_learning_model((19679, 64))
+model = create_deep_learning_model((128, 64))
 model.summary()
 
 # Load preprocessed EEG data
@@ -24,7 +24,7 @@ if data is not None:
 
     # Reshape data to match the model's expected input shape
     data = np.array([segment.values for segment in segments])
-    data = data.reshape((data.shape[0], data.shape[1]))
+    data = data.reshape((data.shape[0], data.shape[1], data.shape[2]))
 
     # Placeholder function to generate labels based on EEG data
     def generate_labels(data):
