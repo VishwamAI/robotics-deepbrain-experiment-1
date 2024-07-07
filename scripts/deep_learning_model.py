@@ -8,13 +8,13 @@ import os
 
 def create_deep_learning_model(input_shape):
     """
-    Create a deep learning model for EEG data interpretation.
+    Create a deep learning model for EEG data interpretation and hologram generation.
 
     Args:
     input_shape (tuple): Shape of the input data (timesteps, features).
 
     Returns:
-    tf.keras.Model: Compiled deep learning model.
+    tf.keras.Model: Compiled deep learning model that outputs 3 continuous values for hologram parameters.
     """
     model = Sequential()
 
@@ -45,16 +45,24 @@ def create_deep_learning_model(input_shape):
 
 def load_preprocessed_data(file_path):
     """
-    Load preprocessed EEG data from a CSV file.
+    Load preprocessed EEG data from a CSV file and normalize it.
 
     Args:
     file_path (str): Path to the CSV file.
 
     Returns:
-    np.ndarray: Loaded data as a NumPy array.
+    np.ndarray: Loaded and normalized data as a NumPy array.
     """
     df = pd.read_csv(file_path)
-    return df.values
+    data = df.values
+
+    # Normalize the data
+    data = (data - np.min(data)) / (np.max(data) - np.min(data))
+
+    # Reshape the data to match the model's input shape
+    data = data.reshape(-1, 256, 64)
+
+    return data
 
 def train_model(model, data, labels, epochs=10, batch_size=32):
     """
@@ -75,16 +83,20 @@ def train_model(model, data, labels, epochs=10, batch_size=32):
 
 def predict(model, data):
     """
-    Make predictions using the trained model.
+    Make predictions using the trained model and post-process the output for hologram generation.
 
     Args:
     model (tf.keras.Model): Trained deep learning model.
     data (np.ndarray): Data to make predictions on.
 
     Returns:
-    np.ndarray: Model predictions.
+    np.ndarray: Post-processed model predictions for hologram parameters.
     """
     predictions = model.predict(data)
+
+    # Post-process the predictions to ensure they are suitable for hologram generation
+    predictions = np.clip(predictions, 0, 1)
+
     return predictions
 
 if __name__ == "__main__":
