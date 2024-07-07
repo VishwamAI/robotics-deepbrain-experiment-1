@@ -44,11 +44,10 @@ if data is not None:
     # Make predictions using the trained model
     predictions = predict(model, data)
 
-    # Ensure predictions are in the correct format
-    predictions_dict = {
-        "position": predictions[:, :2].tolist(),  # Extract the first two columns for position and convert to list
-        "intensity": predictions[:, 2].tolist()   # Extract the third column for intensity and convert to list
-    }
+    # Print debugging information
+    print("Predictions shape:", predictions.shape)
+    print("Predictions type:", type(predictions))
+    print("Predictions:", predictions)
 
     # Load and preprocess a sample image
     image_path = "/home/ubuntu/browser_downloads/codioful-formerly-gradienta-7E5kq_sW0Ew-unsplash.jpg"
@@ -60,7 +59,10 @@ if data is not None:
         exit(1)
 
     # Generate a hologram using the model's predictions
-    hologram = generate_hologram(preprocessed_image, predictions_dict)
+    hologram = generate_hologram(preprocessed_image, {
+        "position": predictions[:, :2],
+        "intensity": predictions[:, 2]
+    })
 
     # Display the generated hologram
     display_image(hologram, window_name="Hologram")
