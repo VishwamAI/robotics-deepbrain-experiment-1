@@ -104,21 +104,14 @@ def predict(model, data):
     data (np.ndarray): Data to make predictions on (timesteps, features).
 
     Returns:
-    dict: Post-processed model predictions for hologram parameters.
+    np.ndarray: Model predictions for hologram parameters.
     """
     predictions = model.predict(data)
 
     # Post-process the predictions to ensure they are suitable for hologram generation
     predictions = np.clip(predictions, 0, 1)
 
-    # Separate the predictions into position and intensity
-    position = predictions[:, :2]
-    intensity = predictions[:, 2]
-
-    return {
-        "position": position,
-        "intensity": intensity
-    }
+    return predictions
 
 if __name__ == "__main__":
     # Load preprocessed data
