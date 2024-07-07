@@ -51,15 +51,14 @@ def generate_hologram(image, model_output):
 
     Args:
     image (np.ndarray): Input image.
-    model_output (dict): Output from the neural network model with keys 'position', 'intensity', and 'shape'.
+    model_output (dict): Output from the neural network model with keys 'position' and 'intensity'.
 
     Returns:
     np.ndarray: Generated hologram image.
     """
-    # Extract position, intensity, and shape from the model output dictionary
+    # Extract position and intensity from the model output dictionary
     position = model_output['position']
     intensity = model_output['intensity']
-    shape = model_output['shape']
 
     # Create a blank canvas for the hologram
     hologram = np.zeros_like(image)
@@ -69,7 +68,7 @@ def generate_hologram(image, model_output):
     center_y = int(position[1] * image.shape[0])
 
     # Define the radius and intensity for the hologram
-    radius = int(shape * min(image.shape[:2]) / 2)
+    radius = int(0.1 * min(image.shape[:2]))  # Assuming a fixed radius for simplicity
     intensity = np.clip(intensity, 0, 1)
 
     # Draw the hologram on the canvas
@@ -90,8 +89,7 @@ if __name__ == "__main__":
     # Example model output (random values for demonstration)
     model_output = {
         "position": np.random.rand(2),
-        "intensity": np.random.rand(),
-        "shape": np.random.rand()
+        "intensity": np.random.rand()
     }
 
     # Generate and display the hologram

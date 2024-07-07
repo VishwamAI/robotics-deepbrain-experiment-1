@@ -1,2 +1,1 @@
-# Ignore virtual environment directory
-venv/
+*.csv

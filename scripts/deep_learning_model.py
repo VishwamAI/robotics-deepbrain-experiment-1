@@ -11,15 +11,18 @@ def create_deep_learning_model(input_shape):
     Create a deep learning model for EEG data interpretation and hologram generation.
 
     Args:
-    input_shape (tuple): Shape of the input data (timesteps, features). For example, (19679, 64).
+    input_shape (tuple): Shape of the input data (timesteps, features).
 
     Returns:
     tf.keras.Model: Compiled deep learning model that outputs 3 continuous values for hologram parameters.
     """
     model = Sequential()
 
-    # Input layer
-    model.add(tf.keras.Input(shape=(input_shape[1], input_shape[2])))
+    # Input layer with variable-length sequences
+    model.add(tf.keras.Input(shape=input_shape))
+
+    # Masking layer to handle padding
+    model.add(tf.keras.layers.Masking(mask_value=0.0))
 
     # Convolutional layers for feature extraction
     model.add(Conv1D(filters=64, kernel_size=3, activation='relu'))
@@ -54,7 +57,7 @@ def load_preprocessed_data(file_path):
     file_path (str): Path to the CSV file.
 
     Returns:
-    np.ndarray: Loaded and normalized data as a NumPy array.
+    np.ndarray: Loaded and normalized data as a 2D NumPy array (timesteps, features).
     """
     df = pd.read_csv(file_path)
     data = df.values
@@ -62,8 +65,8 @@ def load_preprocessed_data(file_path):
     # Normalize the data
     data = (data - np.min(data)) / (np.max(data) - np.min(data))
 
-    # Reshape the data to match the model's input shape
-    data = data.reshape((1, 19679, 64))
+    # Reshape data to 2D array (timesteps, features)
+    data = data.reshape((data.shape[0], data.shape[1]))
 
     return data
 
@@ -73,8 +76,8 @@ def train_model(model, data, labels, epochs=10, batch_size=32, validation_split=
 
     Args:
     model (tf.keras.Model): Compiled deep learning model.
-    data (np.ndarray): Training data.
-    labels (dict): Training labels with keys 'position', 'intensity', and 'shape'.
+    data (np.ndarray): Training data (timesteps, features).
+    labels (dict): Training labels with keys 'position' and 'intensity'.
     epochs (int): Number of training epochs.
     batch_size (int): Batch size for training.
     validation_split (float): Fraction of the training data to be used as validation data.
@@ -83,7 +86,7 @@ def train_model(model, data, labels, epochs=10, batch_size=32, validation_split=
     tf.keras.callbacks.History: Training history.
     """
     # Combine the labels into a single array for training
-    combined_labels = np.hstack((labels['position'], labels['intensity'].reshape(-1, 1), labels['shape'].reshape(-1, 1)))
+    combined_labels = np.hstack((labels['position'], labels['intensity'].reshape(-1, 1)))
 
     if validation_split > 0.0:
         history = model.fit(data, combined_labels, epochs=epochs, batch_size=batch_size, validation_split=validation_split)
@@ -98,7 +101,7 @@ def predict(model, data):
 
     Args:
     model (tf.keras.Model): Trained deep learning model.
-    data (np.ndarray): Data to make predictions on.
+    data (np.ndarray): Data to make predictions on (timesteps, features).
 
     Returns:
     dict: Post-processed model predictions for hologram parameters.
@@ -108,34 +111,31 @@ def predict(model, data):
     # Post-process the predictions to ensure they are suitable for hologram generation
     predictions = np.clip(predictions, 0, 1)
 
-    # Separate the predictions into position, intensity, and shape
+    # Separate the predictions into position and intensity
     position = predictions[:, :2]
     intensity = predictions[:, 2]
-    shape = np.ones_like(intensity)  # Assuming shape is constant for simplicity
 
     return {
         "position": position,
-        "intensity": intensity,
-        "shape": shape
+        "intensity": intensity
     }
 
 if __name__ == "__main__":
-    # Example usage
-    input_shape = (19679, 64)  # Example input shape (timesteps, features)
-    model = create_deep_learning_model(input_shape)
-    model.summary()
-
     # Load preprocessed data
     csv_dir = 'Physionet EEGMMIDB in MATLAB structure and CSV files to leverage accessibility and exploitation/CSV files/'
     sample_file = 'SUB_001_SIG_01.csv'
     file_path = os.path.join(csv_dir, sample_file)
     data = load_preprocessed_data(file_path)
 
+    # Create the deep learning model with dynamic input shape
+    input_shape = data.shape[1:]
+    model = create_deep_learning_model(input_shape)
+    model.summary()
+
     # Example labels (3 values for hologram generation)
     labels = {
         "position": np.random.rand(data.shape[0], 2),
-        "intensity": np.random.rand(data.shape[0]),
-        "shape": np.ones(data.shape[0])  # Assuming shape is constant for simplicity
+        "intensity": np.random.rand(data.shape[0])
     }
 
     # Train the model
