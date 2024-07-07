@@ -19,9 +19,9 @@ data = load_preprocessed_data(file_path)
 
 # Example labels (3 values for hologram generation)
 labels = {
-    "position": np.random.rand(data.shape[1], 2),
-    "intensity": np.random.rand(data.shape[1]),
-    "shape": np.ones(data.shape[1])  # Assuming shape is constant for simplicity
+    "position": np.random.rand(data.shape[0], 2),
+    "intensity": np.random.rand(data.shape[0]),
+    "shape": np.ones(data.shape[0])  # Assuming shape is constant for simplicity
 }
 
 # Train the model
