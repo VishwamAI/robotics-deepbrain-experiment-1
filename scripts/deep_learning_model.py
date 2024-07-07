@@ -11,15 +11,18 @@ def create_deep_learning_model(input_shape):
     Create a deep learning model for EEG data interpretation and hologram generation.
 
     Args:
-    input_shape (tuple): Shape of the input data (timesteps, features).
+    input_shape (tuple): Shape of the input data (timesteps, features). For example, (1, 19679, 64).
 
     Returns:
     tf.keras.Model: Compiled deep learning model that outputs 3 continuous values for hologram parameters.
     """
     model = Sequential()
 
+    # Input layer
+    model.add(tf.keras.Input(shape=input_shape))
+
     # Convolutional layers for feature extraction
-    model.add(Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=input_shape))
+    model.add(Conv1D(filters=64, kernel_size=3, activation='relu'))
     model.add(MaxPooling1D(pool_size=2))
     model.add(Dropout(0.5))
 
@@ -60,7 +63,7 @@ def load_preprocessed_data(file_path):
     data = (data - np.min(data)) / (np.max(data) - np.min(data))
 
     # Reshape the data to match the model's input shape
-    data = data.reshape(76, 256, 64)
+    data = data.reshape(1, 19679, 64)
 
     return data
 
@@ -113,7 +116,7 @@ def predict(model, data):
 
 if __name__ == "__main__":
     # Example usage
-    input_shape = (256, 64)  # Example input shape (timesteps, features)
+    input_shape = (1, 19679, 64)  # Example input shape (timesteps, features)
     model = create_deep_learning_model(input_shape)
     model.summary()
 
