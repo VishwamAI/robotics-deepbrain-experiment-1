@@ -63,7 +63,7 @@ def load_preprocessed_data(file_path):
     data = (data - np.min(data)) / (np.max(data) - np.min(data))
 
     # Reshape the data to match the model's input shape
-    data = data.reshape(19679, 64)
+    data = data.reshape((1, 19679, 64))
 
     return data
 
