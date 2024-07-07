@@ -74,7 +74,7 @@ def generate_hologram(image, position, intensity):
 
     # Ensure intensity is a scalar value
     if isinstance(intensity, np.ndarray):
-        intensity = intensity.item()
+        intensity = intensity.mean()
 
     # Draw the hologram on the canvas
     cv2.circle(hologram, (center_x, center_y), radius, (intensity, intensity, intensity), -1)
