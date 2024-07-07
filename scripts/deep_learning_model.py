@@ -71,14 +71,17 @@ def train_model(model, data, labels, epochs=10, batch_size=32):
     Args:
     model (tf.keras.Model): Compiled deep learning model.
     data (np.ndarray): Training data.
-    labels (np.ndarray): Training labels.
+    labels (dict): Training labels with keys 'position', 'intensity', and 'shape'.
     epochs (int): Number of training epochs.
     batch_size (int): Batch size for training.
 
     Returns:
     tf.keras.callbacks.History: Training history.
     """
-    history = model.fit(data, labels, epochs=epochs, batch_size=batch_size, validation_split=0.2)
+    # Combine the labels into a single array for training
+    combined_labels = np.hstack((labels['position'], labels['intensity'].reshape(-1, 1), labels['shape'].reshape(-1, 1)))
+
+    history = model.fit(data, combined_labels, epochs=epochs, batch_size=batch_size, validation_split=0.2)
     return history
 
 def predict(model, data):
@@ -90,14 +93,23 @@ def predict(model, data):
     data (np.ndarray): Data to make predictions on.
 
     Returns:
-    np.ndarray: Post-processed model predictions for hologram parameters.
+    dict: Post-processed model predictions for hologram parameters.
     """
     predictions = model.predict(data)
 
     # Post-process the predictions to ensure they are suitable for hologram generation
     predictions = np.clip(predictions, 0, 1)
 
-    return predictions
+    # Separate the predictions into position, intensity, and shape
+    position = predictions[:, :2]
+    intensity = predictions[:, 2]
+    shape = np.ones_like(intensity)  # Assuming shape is constant for simplicity
+
+    return {
+        "position": position,
+        "intensity": intensity,
+        "shape": shape
+    }
 
 if __name__ == "__main__":
     # Example usage
@@ -112,7 +124,11 @@ if __name__ == "__main__":
     data = load_preprocessed_data(file_path)
 
     # Example labels (3 values for hologram generation)
-    labels = np.random.rand(data.shape[0], 3)
+    labels = {
+        "position": np.random.rand(data.shape[0], 2),
+        "intensity": np.random.rand(data.shape[0]),
+        "shape": np.ones(data.shape[0])  # Assuming shape is constant for simplicity
+    }
 
     # Train the model
     history = train_model(model, data, labels)
