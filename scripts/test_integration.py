@@ -59,10 +59,9 @@ if data is not None:
         exit(1)
 
     # Generate a hologram using the model's predictions
-    hologram = generate_hologram(preprocessed_image, {
-        "position": predictions[:, :2],
-        "intensity": predictions[:, 2]
-    })
+    position = predictions[:, :2]
+    intensity = predictions[:, 2]
+    hologram = generate_hologram(preprocessed_image, position, intensity)
 
     # Display the generated hologram
     display_image(hologram, window_name="Hologram")
