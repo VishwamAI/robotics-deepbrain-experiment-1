@@ -5,6 +5,9 @@ from tensorflow.keras.optimizers import Adam
 import pandas as pd
 import numpy as np
 import os
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.preprocessing import StandardScaler
+from mne.decoding import CSP
 
 def create_deep_learning_model(input_shape):
     """
