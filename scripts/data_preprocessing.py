@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from mne.decoding import CSP
 import os
 import matplotlib.pyplot as plt
 
@@ -89,6 +90,40 @@ def plot_eeg_signals(df, title="EEG Signals"):
     plt.legend(loc="upper right")
     plt.show()
 
+def extract_band_power_features(df, bands):
+    """
+    Extract band power features from EEG signals.
+
+    Args:
+    df (pd.DataFrame): Input DataFrame.
+    bands (list of tuple): List of frequency bands as (low, high) tuples.
+
+    Returns:
+    pd.DataFrame: DataFrame with band power features.
+    """
+    band_power_features = []
+    for band in bands:
+        low, high = band
+        band_power = df.apply(lambda x: np.log(np.var(x[(x >= low) & (x <= high)])), axis=1)
+        band_power_features.append(band_power)
+    return pd.concat(band_power_features, axis=1)
+
+def apply_csp(df, labels, n_components=4):
+    """
+    Apply Common Spatial Patterns (CSP) to EEG signals.
+
+    Args:
+    df (pd.DataFrame): Input DataFrame.
+    labels (np.ndarray): Array of labels corresponding to the data.
+    n_components (int): Number of CSP components to keep.
+
+    Returns:
+    pd.DataFrame: DataFrame with CSP features.
+    """
+    csp = CSP(n_components=n_components)
+    csp_features = csp.fit_transform(df.values, labels)
+    return pd.DataFrame(csp_features)
+
 if __name__ == "__main__":
     try:
         # Example usage
@@ -104,12 +139,22 @@ if __name__ == "__main__":
             normalized_df = normalize_data(df)
             print("Normalized Data:\n", normalized_df.head())
 
+            # Extract band power features
+            bands = [(0.5, 4), (4, 8), (8, 12), (12, 30)]  # Example frequency bands
+            band_power_df = extract_band_power_features(normalized_df, bands)
+            print("Band Power Features:\n", band_power_df.head())
+
+            # Apply CSP
+            labels = np.random.randint(0, 2, size=(band_power_df.shape[0],))  # Example labels
+            csp_df = apply_csp(band_power_df, labels)
+            print("CSP Features:\n", csp_df.head())
+
             # Reduce dimensionality
-            reduced_df = reduce_dimensionality(normalized_df)
+            reduced_df = reduce_dimensionality(csp_df)
             print("Reduced Dimensionality Data:\n", reduced_df.head())
 
             # Segment the data
-            segments = segment_data(normalized_df, window_size=128, step_size=64)
+            segments = segment_data(reduced_df, window_size=128, step_size=64)
             print("Number of Segments:", len(segments))
             print("First Segment:\n", segments[0])
 
