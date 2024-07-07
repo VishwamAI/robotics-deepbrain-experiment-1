@@ -36,10 +36,10 @@ def create_deep_learning_model(input_shape):
     # Fully connected layers for final prediction
     model.add(Dense(100, activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(3, activation='sigmoid'))  # Change output layer to produce 3 values
+    model.add(Dense(3, activation='linear'))  # Change output layer to produce 3 values with linear activation
 
     # Compile the model
-    model.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error', metrics=['accuracy'])
+    model.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error', metrics=[])
 
     return model
 
