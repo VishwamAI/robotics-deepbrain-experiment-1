@@ -2,7 +2,7 @@ import os
 import numpy as np
 import cv2
 from deep_learning_model import create_deep_learning_model, load_preprocessed_data, predict, train_model
-from image_processing import load_image, preprocess_image, generate_hologram, display_image
+from image_processing import load_image, preprocess_image, generate_hologram
 from data_preprocessing import load_csv_data_in_chunks, normalize_data, segment_data
 
 # Create the deep learning model
@@ -63,7 +63,7 @@ if data is not None:
     intensity = predictions[:, 2]
     hologram = generate_hologram(preprocessed_image, position, intensity)
 
-    # Display the generated hologram
-    display_image(hologram, window_name="Hologram")
+    # Remove the call to display the generated hologram
+    # display_image(hologram, window_name="Hologram")
 else:
     print(f"File not found: {file_path}")
