@@ -52,26 +52,34 @@ def create_deep_learning_model(input_shape):
 
     return model
 
-def load_preprocessed_data(file_path):
+def load_preprocessed_data(file_path, labels, n_components=4):
     """
-    Load preprocessed EEG data from a CSV file and normalize it.
+    Load preprocessed EEG data from a CSV file, normalize it, and apply CSP and LDA.
 
     Args:
     file_path (str): Path to the CSV file.
+    labels (np.ndarray): Array of labels corresponding to the data.
+    n_components (int): Number of CSP components to keep.
 
     Returns:
-    np.ndarray: Loaded and normalized data as a 2D NumPy array (timesteps, features).
+    np.ndarray: Loaded, normalized, and processed data as a 2D NumPy array (timesteps, features).
     """
     df = pd.read_csv(file_path)
     data = df.values
 
     # Normalize the data
-    data = (data - np.min(data)) / (np.max(data) - np.min(data))
+    scaler = StandardScaler()
+    normalized_data = scaler.fit_transform(data)
 
-    # Reshape data to 2D array (timesteps, features)
-    data = data.reshape((data.shape[0], data.shape[1]))
+    # Apply CSP
+    csp = CSP(n_components=n_components)
+    csp_features = csp.fit_transform(normalized_data, labels)
 
-    return data
+    # Apply LDA
+    lda = LinearDiscriminantAnalysis()
+    lda_features = lda.fit_transform(csp_features, labels)
+
+    return lda_features
 
 def train_model(model, data, labels, epochs=10, batch_size=32, validation_split=0.2):
     """
