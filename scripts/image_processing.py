@@ -72,6 +72,10 @@ def generate_hologram(image, position, intensity):
     radius = int(0.1 * min(image.shape[:2]))  # Assuming a fixed radius for simplicity
     intensity = np.clip(intensity, 0, 1)
 
+    # Ensure intensity is a scalar value
+    if isinstance(intensity, np.ndarray):
+        intensity = intensity.item()
+
     # Draw the hologram on the canvas
     cv2.circle(hologram, (center_x, center_y), radius, (intensity, intensity, intensity), -1)
 
