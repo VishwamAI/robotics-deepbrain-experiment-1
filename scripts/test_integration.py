@@ -44,6 +44,12 @@ if data is not None:
     # Make predictions using the trained model
     predictions = predict(model, data)
 
+    # Ensure predictions are in the correct format
+    predictions = {
+        "position": predictions[:, :2],  # Extract the first two columns for position
+        "intensity": predictions[:, 2]   # Extract the third column for intensity
+    }
+
     # Load and preprocess a sample image
     image_path = "/home/ubuntu/browser_downloads/codioful-formerly-gradienta-7E5kq_sW0Ew-unsplash.jpg"
     try:
