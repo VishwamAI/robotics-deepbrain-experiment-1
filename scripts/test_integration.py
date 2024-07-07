@@ -45,9 +45,9 @@ if data is not None:
     predictions = predict(model, data)
 
     # Ensure predictions are in the correct format
-    predictions = {
-        "position": predictions[:, :2],  # Extract the first two columns for position
-        "intensity": predictions[:, 2]   # Extract the third column for intensity
+    predictions_dict = {
+        "position": predictions[:, :2].tolist(),  # Extract the first two columns for position and convert to list
+        "intensity": predictions[:, 2].tolist()   # Extract the third column for intensity and convert to list
     }
 
     # Load and preprocess a sample image
@@ -60,7 +60,7 @@ if data is not None:
         exit(1)
 
     # Generate a hologram using the model's predictions
-    hologram = generate_hologram(preprocessed_image, predictions)
+    hologram = generate_hologram(preprocessed_image, predictions_dict)
 
     # Display the generated hologram
     display_image(hologram, window_name="Hologram")
