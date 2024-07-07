@@ -76,6 +76,9 @@ def generate_hologram(image, position, intensity):
     if isinstance(intensity, np.ndarray):
         intensity = intensity.mean()
 
+    # Convert intensity to an integer value
+    intensity = int(intensity * 255)
+
     # Draw the hologram on the canvas
     cv2.circle(hologram, (center_x, center_y), radius, (intensity, intensity, intensity), -1)
 
