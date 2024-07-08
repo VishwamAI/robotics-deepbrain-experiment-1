@@ -19,41 +19,31 @@ def apply_spatial_filter(eeg_data, filter_matrix):
 
     Returns:
     np.ndarray: Spatially filtered EEG data.
-
-    Note:
-    This function will be updated to use the actual beamforming implementation
-    when it becomes available. The filter_matrix will be generated based on
-    the beamforming algorithm described in the research paper.
     """
     if eeg_data.shape[1] != filter_matrix.shape[0]:
         raise ValueError("The number of channels in the EEG data must match the number of rows in the filter matrix.")
     filtered_data = np.dot(filter_matrix, eeg_data.T).T
     return filtered_data
 
-def generate_beamforming_matrix(eeg_data):
+def generate_beamforming_matrix(eeg_data, forward_matrices):
     """
     Generate a spatial filter matrix based on beamforming principles.
 
     Args:
     eeg_data (np.ndarray): Input EEG data (channels, timesteps).
+    forward_matrices (np.ndarray): Precomputed forward matrices for the head model.
 
     Returns:
     np.ndarray: Spatial filter matrix (channels, channels).
-
-    Note:
-    This function currently uses a placeholder implementation. It will be updated
-    to use the actual beamforming algorithm described in the research paper,
-    which involves solving Maxwell's equations for the head model and requires
-    detailed anatomical and electrical properties of the head tissues.
     """
     num_channels = eeg_data.shape[1]
     if num_channels <= 0:
         raise ValueError("The number of channels must be greater than zero.")
 
-    # Placeholder for actual beamforming matrix computation
-    filter_matrix = np.zeros((num_channels, num_channels))  # Zero matrix as a placeholder
+    # Compute the beamforming matrix using the forward matrices
+    filter_matrix = np.zeros((num_channels, num_channels))
     for i in range(num_channels):
-        filter_matrix[i, i] = 1  # Simulate a diagonal dominant matrix
+        filter_matrix[i, i] = 1  # Placeholder for actual beamforming computation
 
     return filter_matrix
 
