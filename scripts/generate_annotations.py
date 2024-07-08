@@ -1,6 +1,6 @@
 import mne
 import pandas as pd
-from scipy.io import loadmat
+import h5py
 
 def generate_annotations(eeg_file, output_file):
     """
@@ -14,9 +14,9 @@ def generate_annotations(eeg_file, output_file):
     None
     """
     try:
-        # Load the EEG data from MATLAB file
-        mat = loadmat(eeg_file)
-        raw_data = mat['EEG']  # Adjust this key based on the actual structure of the MATLAB file
+        # Load the EEG data from MATLAB file using h5py
+        with h5py.File(eeg_file, 'r') as f:
+            raw_data = f['EEG'][:]  # Adjust this key based on the actual structure of the MATLAB file
 
         # Create an MNE Raw object from the loaded data
         info = mne.create_info(ch_names=['EEG'], sfreq=256)  # Adjust channel names and sampling frequency as needed
