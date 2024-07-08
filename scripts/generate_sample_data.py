@@ -113,6 +113,9 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         if remainder != 0:
             band_power_df = band_power_df.iloc[:-remainder]
 
+        # Log the shapes after trimming band_power_df
+        print(f"band_power_df shape after trimming: {band_power_df.shape}")
+
         # Ensure labels match the number of trials
         unique_labels, counts = np.unique(labels, return_counts=True)
         min_count = min(counts)
@@ -130,6 +133,10 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
 
         # Trim band_power_df to match the new number of trials
         band_power_df = band_power_df.iloc[:n_trials * n_channels]
+
+        # Log the shapes after trimming labels and band_power_df
+        print(f"band_power_df shape after trimming to match trials: {band_power_df.shape}")
+        print(f"Labels shape after trimming to match trials: {labels.shape}")
 
         # Ensure the length of the balanced labels array matches the number of samples in the trimmed band_power_df
         if len(labels) != len(band_power_df):
@@ -149,6 +156,9 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
             raise ValueError(f"The number of unique labels after trimming ({len(unique_labels_after_trim)}) does not match the expected count ({len(unique_labels)}).")
 
         band_power_3d = band_power_df.values.reshape((n_trials, n_channels, -1))  # Reshape to (trials, channels, time)
+
+        # Log the shape of the reshaped 3D array
+        print(f"band_power_3d shape after reshaping: {band_power_3d.shape}")
 
         # Handle NaNs and infinite values in the reshaped 3D array
         band_power_3d = np.where(np.isnan(band_power_3d), np.nanmean(band_power_3d, axis=(0, 1), keepdims=True), band_power_3d)  # axis=(0, 1) means averaging over trials and channels
