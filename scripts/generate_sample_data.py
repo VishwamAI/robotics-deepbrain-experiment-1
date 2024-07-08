@@ -71,6 +71,7 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
 
         # Ensure there are multiple unique labels
         unique_labels = np.unique(labels)
+        print(f"Unique labels: {unique_labels}")  # Log the unique classes present in the labels array
         if len(unique_labels) < 2:
             raise ValueError("The labels file must contain at least two unique classes for CSP.")
 
