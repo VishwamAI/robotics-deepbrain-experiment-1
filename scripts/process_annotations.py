@@ -30,7 +30,7 @@ def process_annotations(annotation_dir, output_file):
     for filename in os.listdir(annotation_dir):
         full_path = os.path.join(annotation_dir, filename)
         print(f"Checking file: {full_path}")
-        if filename.lower().endswith("_ann.csv"):
+        if "_ann" in filename.lower() and filename.lower().endswith(".csv"):
             annotation_files_found = True
             file_path = os.path.join(annotation_dir, filename)
             ann_df = pd.read_csv(file_path, header=None)
@@ -43,7 +43,7 @@ def process_annotations(annotation_dir, output_file):
                 labels.extend([event_type] * (end_sample - start_sample + 1))
 
     if not annotation_files_found:
-        print(f"Error: No annotation files ending with '_ANN.csv' found in the directory {annotation_dir}.")
+        print(f"Error: No annotation files ending with '_ann.csv' found in the directory {annotation_dir}.")
         return
 
     # Save the labels to the output file
