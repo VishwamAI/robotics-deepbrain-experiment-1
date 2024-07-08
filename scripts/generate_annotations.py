@@ -88,6 +88,8 @@ def generate_annotations(eeg_file, output_dir):
                                                                 raise ValueError(f"Unexpected length of event_data: {len(event_data)}")
 
                                                             print(f"Type of event_data[2] before dereferencing: {type(event_data[2])}, value: {event_data[2]}")
+                                                            print(f"Type of event_data[0] before dereferencing: {type(event_data[0])}, value: {event_data[0]}")
+                                                            print(f"Type of event_data[1] before dereferencing: {type(event_data[1])}, value: {event_data[1]}")
                                                             try:
                                                                 if isinstance(event_data[2], h5py.Reference):
                                                                     print(f"Dereferencing event_data[2]: {event_data[2]}")
