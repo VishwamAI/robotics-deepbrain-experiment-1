@@ -14,7 +14,7 @@ certifi==2020.6.20
 chardet==4.0.0
 charset-normalizer==3.3.2
 click==8.0.3
-cloud-init==23.3.3
+# Removed cloud-init==23.3.3 as it is not available in PyPI and is a system-level package
 colorama==0.4.4
 command-not-found==0.3
 configobj==5.0.6
