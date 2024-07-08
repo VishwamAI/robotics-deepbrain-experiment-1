@@ -48,8 +48,8 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         # Check for NaNs or infinite values in the initial sample data
         if sample_df.isnull().values.any() or np.isinf(sample_df.values).any():
             print("Initial sample data contains NaNs or infinite values. Handling them...")
-            sample_df = sample_df.fillna(sample_df.mean())  # Replace NaNs with the mean of the column
-            sample_df = sample_df.replace([np.inf, -np.inf], sample_df.mean())  # Replace infinite values with the mean of the column
+            sample_df = sample_df.apply(lambda x: x.fillna(x.mean()))  # Replace NaNs with the mean of the column
+            sample_df = sample_df.apply(lambda x: x.replace([np.inf, -np.inf], x.mean()))  # Replace infinite values with the mean of the column
 
         # Ensure the labels match the sample data length
         if len(labels) < len(sample_df):
@@ -69,8 +69,8 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         # Check for NaNs or infinite values in the normalized data
         if normalized_df.isnull().values.any() or np.isinf(normalized_df.values).any():
             print("Normalized data contains NaNs or infinite values. Handling them...")
-            normalized_df = normalized_df.fillna(normalized_df.mean())  # Replace NaNs with the mean of the column
-            normalized_df = normalized_df.replace([np.inf, -np.inf], normalized_df.mean())  # Replace infinite values with the mean of the column
+            normalized_df = normalized_df.apply(lambda x: x.fillna(x.mean()))  # Replace NaNs with the mean of the column
+            normalized_df = normalized_df.apply(lambda x: x.replace([np.inf, -np.inf], x.mean()))  # Replace infinite values with the mean of the column
 
         # Extract band power features
         bands = [(0.5, 4), (4, 8), (8, 12), (12, 30)]  # Example frequency bands
