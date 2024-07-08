@@ -38,7 +38,7 @@ def generate_eeg_annotations(eeg_file_path, output_csv_path):
                                         sub_dereferenced_data = f[actual_ref]
                                         if isinstance(sub_dereferenced_data, h5py.Dataset):
                                             event_data = np.array(sub_dereferenced_data[:])
-                                            logging.info(f"Event data for {subject}: {event_data}")
+                                            logging.info(f"Event data shape for {subject}: {event_data.shape}")
                                             for event in event_data:
                                                 if len(event) == 3:
                                                     events.append([subject] + list(event))
