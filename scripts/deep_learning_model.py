@@ -296,7 +296,8 @@ if __name__ == "__main__":
     forward_matrix = np.random.rand(64, 3)  # Example shape (channels, 3)
 
     # Create the deep learning model with dynamic input shape
-    input_shape = (data.shape[1], 1)  # Ensure input shape is 3D: (timesteps, features, 1)
+    input_shape = (1, data.shape[1])  # Ensure input shape is 2D: (1, features)
+    data = data.reshape((data.shape[0], 1, data.shape[1]))  # Reshape data to (samples, 1, features)
     model = create_deep_learning_model(input_shape, transition_matrix, process_noise_cov, forward_matrix)
     model.summary()
 
