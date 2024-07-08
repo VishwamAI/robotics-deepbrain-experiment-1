@@ -57,6 +57,7 @@ def generate_annotations(eeg_file, output_dir):
                         print(f"Annotations key not found for subject: {subject}")
                         continue
 
+                    print(f"Annotations key found for subject: {subject}")
                     try:
                         annotations_refs = f['EEGMMIDB']['Annotations'][subject][0]
                         print(f"Annotations references for subject {subject}: {annotations_refs}")
