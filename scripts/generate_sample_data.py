@@ -144,6 +144,12 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
 
         band_power_3d = band_power_df.values.reshape((n_trials, n_channels, -1))  # Reshape to (trials, channels, time)
 
+        # Handle NaNs and infinite values in the reshaped 3D array
+        band_power_3d = np.where(np.isnan(band_power_3d), np.nanmean(band_power_3d, axis=(0, 1)), band_power_3d)
+        band_power_3d = np.where(np.isinf(band_power_3d), np.nanmean(band_power_3d, axis=(0, 1)), band_power_3d)
+        # Fallback strategy for cases where np.nanmean returns NaN
+        band_power_3d = np.nan_to_num(band_power_3d, nan=np.nanmean(band_power_3d, axis=(0, 1)))
+
         # Trim the labels array to match the new number of trials
         labels = labels[:n_trials]
 
