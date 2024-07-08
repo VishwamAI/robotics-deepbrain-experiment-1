@@ -13,6 +13,8 @@ def check_annotations(annotation_dir):
             annotation_files_found = True
             annotation_files_count += 1
             print(f'Annotation file found: {filename}')
+        else:
+            print(f'Not an annotation file: {filename}')
     print(f'Total files checked: {total_files}')
     print(f'Annotation files detected: {annotation_files_count}')
     if annotation_files_found:
