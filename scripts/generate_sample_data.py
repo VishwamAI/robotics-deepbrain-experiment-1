@@ -81,6 +81,9 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
             band_power_features.append(band_power)
         band_power_df = pd.concat(band_power_features, axis=1)
 
+        # Log the min, max, and mean values of the band power features
+        print(f"Band power features - min: {band_power_df.min().min()}, max: {band_power_df.max().max()}, mean: {band_power_df.mean().mean()}")
+
         # Check for NaNs or infinite values in the band power features
         if band_power_df.isnull().values.any() or np.isinf(band_power_df.values).any():
             print("Band power features contain NaNs or infinite values. Handling them...")
