@@ -62,17 +62,20 @@ def generate_annotations(eeg_file, output_dir):
                         except Exception as e:
                             print(f"Error creating stim_data array: {e}")
                         for ref in annotations_refs:
+                            print(f"Type of ref: {type(ref)}, value: {ref}")
                             if isinstance(ref, h5py.Reference):
                                 try:
                                     dereferenced_data = f[ref]
-                                    print(f"Dereferenced data for ref: {ref}")
+                                    print(f"Dereferenced data for ref: {ref}, type: {type(dereferenced_data)}, value: {dereferenced_data}")
                                     for sub_ref in dereferenced_data:
+                                        print(f"Type of sub_ref: {type(sub_ref)}, value: {sub_ref}")
                                         if isinstance(sub_ref, np.ndarray):
                                             for actual_ref in sub_ref:
+                                                print(f"Type of actual_ref: {type(actual_ref)}, value: {actual_ref}")
                                                 if isinstance(actual_ref, h5py.Reference):
                                                     try:
                                                         sub_dereferenced_data = f[actual_ref]
-                                                        print(f"Dereferenced data for actual_ref: {actual_ref}")
+                                                        print(f"Dereferenced data for actual_ref: {actual_ref}, type: {type(sub_dereferenced_data)}, value: {sub_dereferenced_data}")
                                                         if isinstance(sub_dereferenced_data, h5py.Dataset):
                                                             event_data = np.array(sub_dereferenced_data[:])
                                                             print(f"Event data: {event_data}")
