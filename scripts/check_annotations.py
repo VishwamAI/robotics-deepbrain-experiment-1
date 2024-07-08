@@ -9,7 +9,7 @@ def check_annotations(annotation_dir):
         total_files += 1
         full_path = os.path.join(annotation_dir, filename)
         print(f'Checking file: {full_path}')
-        if '_ann.csv' in filename.lower():
+        if '_ann' in filename.lower() and filename.lower().endswith('.csv'):
             annotation_files_found = True
             annotation_files_count += 1
             print(f'Annotation file found: {filename}')
