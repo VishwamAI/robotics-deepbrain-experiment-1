@@ -27,8 +27,7 @@ def generate_annotations(eeg_file, output_dir):
 
             signal_group = f['EEGMMIDB']['Signal']
             for subject in signal_group.keys():
-                ref = signal_group[subject][0, 0]
-                raw_data = f[ref][:]  # Adjust this key based on the actual structure of the MATLAB file
+                raw_data = signal_group[subject][:]  # Adjust this key based on the actual structure of the MATLAB file
 
                 # Extract sampling frequency from metadata if available
                 sfreq = 256  # Default value
