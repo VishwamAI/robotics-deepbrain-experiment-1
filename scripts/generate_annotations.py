@@ -53,31 +53,41 @@ def generate_annotations(eeg_file, output_dir):
                         print(f"Annotations key not found for subject: {subject}")
                         continue
 
-                    annotations_refs = f['EEGMMIDB']['Annotations'][subject][0]
-                    stim_data = np.zeros(raw_data.shape[1])
-                    for ref in annotations_refs:
-                        if isinstance(ref, h5py.Reference):
-                            dereferenced_data = f[ref]
-                            print(f"Dereferenced data for ref: {ref}")
-                            for sub_ref in dereferenced_data:
-                                if isinstance(sub_ref, np.ndarray):
-                                    for actual_ref in sub_ref:
-                                        if isinstance(actual_ref, h5py.Reference):
-                                            sub_dereferenced_data = f[actual_ref]
-                                            print(f"Dereferenced data for actual_ref: {actual_ref}")
-                                            if isinstance(sub_dereferenced_data, h5py.Dataset):
-                                                event_data = np.array(sub_dereferenced_data[:])
-                                                print(f"Event data: {event_data}")
-                                                print(f"Event data before assignment: {event_data}")
-                                                if isinstance(event_data[2], h5py.Reference):
-                                                    event_data[2] = f[event_data[2]][()]
-                                                print(f"Event data[2] after dereferencing: {event_data[2]}")
-                                                if not isinstance(event_data[2], (int, float)):
-                                                    raise ValueError(f"Unexpected data type for event_data[2]: {type(event_data[2])}")
-                                                if not isinstance(event_data[0], (int, float)) or not isinstance(event_data[1], (int, float)):
-                                                    raise ValueError(f"Unexpected data type for event_data[0] or event_data[1]: {type(event_data[0])}, {type(event_data[1])}")
-                                                print(f"Assigning event_data[2] to stim_data[{int(event_data[0])}:{int(event_data[1])}]")
-                                                stim_data[int(event_data[0]):int(event_data[1])] = event_data[2]
+                    try:
+                        annotations_refs = f['EEGMMIDB']['Annotations'][subject][0]
+                        stim_data = np.zeros(raw_data.shape[1])
+                        for ref in annotations_refs:
+                            if isinstance(ref, h5py.Reference):
+                                try:
+                                    dereferenced_data = f[ref]
+                                    print(f"Dereferenced data for ref: {ref}")
+                                    for sub_ref in dereferenced_data:
+                                        if isinstance(sub_ref, np.ndarray):
+                                            for actual_ref in sub_ref:
+                                                if isinstance(actual_ref, h5py.Reference):
+                                                    try:
+                                                        sub_dereferenced_data = f[actual_ref]
+                                                        print(f"Dereferenced data for actual_ref: {actual_ref}")
+                                                        if isinstance(sub_dereferenced_data, h5py.Dataset):
+                                                            event_data = np.array(sub_dereferenced_data[:])
+                                                            print(f"Event data: {event_data}")
+                                                            print(f"Event data before assignment: {event_data}")
+                                                            if isinstance(event_data[2], h5py.Reference):
+                                                                event_data[2] = f[event_data[2]][()]
+                                                            print(f"Event data[2] after dereferencing: {event_data[2]}")
+                                                            if not isinstance(event_data[2], (int, float)):
+                                                                raise ValueError(f"Unexpected data type for event_data[2]: {type(event_data[2])}")
+                                                            if not isinstance(event_data[0], (int, float)) or not isinstance(event_data[1], (int, float)):
+                                                                raise ValueError(f"Unexpected data type for event_data[0] or event_data[1]: {type(event_data[0])}, {type(event_data[1])}")
+                                                            print(f"Assigning event_data[2] to stim_data[{int(event_data[0])}:{int(event_data[1])}]")
+                                                            stim_data[int(event_data[0]):int(event_data[1])] = event_data[2]
+                                                    except Exception as e:
+                                                        print(f"Error dereferencing actual_ref: {e}")
+                                except Exception as e:
+                                    print(f"Error dereferencing ref: {e}")
+                    except Exception as e:
+                        print(f"Error processing annotations_refs: {e}")
+
                     raw.add_channels([mne.io.RawArray(stim_data[np.newaxis, :], mne.create_info(['STI 014'], sfreq))])
                     stim_channel = 'STI 014'
 
