@@ -4,20 +4,72 @@ import h5py
 import os
 import numpy as np
 
-def generate_annotations(eeg_file, output_dir):
-    version = "1.0.1"
-    print(f"Starting generate_annotations (version {version}) with eeg_file: {eeg_file} and output_dir: {output_dir}")
-    print("Script execution started.")
+def process_event_data(event_data, index, f, strategy='mean'):
+    """
+    Process event data element by dereferencing and handling multi-element arrays.
+
+    Args:
+    event_data (list): List of event data elements.
+    index (int): Index of the element to process.
+    f (h5py.File): HDF5 file object.
+    strategy (str): Strategy to handle multi-element arrays ('mean' or 'first').
+
+    Returns:
+    Processed event data element.
+    """
+    if isinstance(event_data[index], h5py.Reference):
+        print(f"Dereferencing event_data[{index}]: {event_data[index]}")
+        event_data[index] = f[event_data[index]][()]
+        print(f"Dereferenced event_data[{index}]: {event_data[index]}")
+        if isinstance(event_data[index], np.ndarray):
+            print(f"Size of event_data[{index}] before conversion: {event_data[index].size}")
+            if event_data[index].size == 1:
+                event_data[index] = event_data[index].item()  # Convert single-element array to scalar
+            else:
+                print(f"event_data[{index}] is not a single-element array: {event_data[index]}")
+                # Handle the case where event_data[index] is not a single-element array
+                # For now, log the size and content of the array
+                print(f"event_data[{index}] size: {event_data[index].size}, content: {event_data[index]}")
+                # Decide on a strategy to handle multi-element arrays
+                if strategy == 'mean':
+                    try:
+                        event_data[index] = np.mean(event_data[index])
+                        print(f"Applied 'mean' strategy to event_data[{index}]: {event_data[index]}")
+                    except Exception as e:
+                        print(f"Error calculating mean of event_data[{index}]: {e}")
+                        # Fallback strategy: take the first element
+                        event_data[index] = event_data[index][0]
+                        print(f"Fallback to first element for event_data[{index}]: {event_data[index]}")
+                elif strategy == 'first':
+                    event_data[index] = event_data[index][0]
+                    print(f"Applied 'first' strategy to event_data[{index}]: {event_data[index]}")
+                else:
+                    raise ValueError(f"Unknown strategy: {strategy}")
+        print(f"Final event_data[{index}]: {event_data[index]}")
+    else:
+        print(f"event_data[{index}] is not a reference: {event_data[index]}")
+    return event_data[index]
+
+def generate_annotations(eeg_file, output_dir, strategy='mean'):
     """
     Generate annotation files from EEG data.
 
     Args:
     eeg_file (str): Path to the input EEG data file.
     output_dir (str): Directory to save the generated annotation files.
+    strategy (str): Strategy to handle multi-element arrays ('mean' or 'first').
 
     Returns:
     None
     """
+    version = "1.0.1"
+    print(f"Starting generate_annotations (version {version}) with eeg_file: {eeg_file}, output_dir: {output_dir}, and strategy: {strategy}")
+    print("Script execution started.")
+
+    # Validate strategy parameter
+    if strategy not in ['mean', 'first']:
+        raise ValueError(f"Invalid strategy: {strategy}. Valid options are 'mean' or 'first'.")
+
     try:
         # Ensure the output directory exists
         if not os.path.exists(output_dir):
@@ -111,47 +163,17 @@ def generate_annotations(eeg_file, output_dir):
                                                             print(f"Type of event_data[0] before dereferencing: {type(event_data[0])}, value: {event_data[0]}")
                                                             print(f"Type of event_data[1] before dereferencing: {type(event_data[1])}, value: {event_data[1]}")
                                                             try:
-                                                                if isinstance(event_data[2], h5py.Reference):
-                                                                    print(f"Dereferencing event_data[2]: {event_data[2]}")
-                                                                    event_data[2] = f[event_data[2]][()]
-                                                                    print(f"Dereferenced event_data[2]: {event_data[2]}")
-                                                                    if isinstance(event_data[2], np.ndarray):
-                                                                        print(f"Size of event_data[2] before conversion: {event_data[2].size}")
-                                                                        if event_data[2].size == 1:
-                                                                            event_data[2] = event_data[2].item()  # Convert single-element array to scalar
-                                                                        else:
-                                                                            print(f"event_data[2] is not a single-element array: {event_data[2]}")
-                                                                            # Handle the case where event_data[2] is not a single-element array
-                                                                            event_data[2] = event_data[2][0]  # For now, take the first element
-                                                                    print(f"Final event_data[2]: {event_data[2]}")
-                                                                else:
-                                                                    print(f"event_data[2] is not a reference: {event_data[2]}")
-                                                                if isinstance(event_data[0], h5py.Reference):
-                                                                    print(f"Dereferencing event_data[0]: {event_data[0]}")
-                                                                    event_data[0] = f[event_data[0]][()]
-                                                                    print(f"Dereferenced event_data[0]: {event_data[0]}")
-                                                                    if isinstance(event_data[0], np.ndarray):
-                                                                        print(f"Size of event_data[0] before conversion: {event_data[0].size}")
-                                                                        if event_data[0].size == 1:
-                                                                            event_data[0] = event_data[0].item()  # Convert single-element array to scalar
-                                                                        else:
-                                                                            print(f"event_data[0] is not a single-element array: {event_data[0]}")
-                                                                    print(f"Final event_data[0]: {event_data[0]}")
-                                                                else:
-                                                                    print(f"event_data[0] is not a reference: {event_data[0]}")
-                                                                if isinstance(event_data[1], h5py.Reference):
-                                                                    print(f"Dereferencing event_data[1]: {event_data[1]}")
-                                                                    event_data[1] = f[event_data[1]][()]
-                                                                    print(f"Dereferenced event_data[1]: {event_data[1]}")
-                                                                    if isinstance(event_data[1], np.ndarray):
-                                                                        print(f"Size of event_data[1] before conversion: {event_data[1].size}")
-                                                                        if event_data[1].size == 1:
-                                                                            event_data[1] = event_data[1].item()  # Convert single-element array to scalar
-                                                                        else:
-                                                                            print(f"event_data[1] is not a single-element array: {event_data[1]}")
-                                                                    print(f"Final event_data[1]: {event_data[1]}")
-                                                                else:
-                                                                    print(f"event_data[1] is not a reference: {event_data[1]}")
+                                                                # Process event_data elements
+                                                                try:
+                                                                    event_data[2] = process_event_data(event_data, 2, f, strategy)
+                                                                    event_data[0] = process_event_data(event_data, 0, f, strategy)
+                                                                    event_data[1] = process_event_data(event_data, 1, f, strategy)
+                                                                except ValueError as ve:
+                                                                    print(f"ValueError encountered while processing event_data: {ve}")
+                                                                    continue  # Skip to the next annotation if an invalid strategy is encountered
+                                                                except Exception as e:
+                                                                    print(f"Error processing event_data: {e}")
+                                                                    raise
                                                             except Exception as e:
                                                                 print(f"Error dereferencing event_data: {e}")
                                                                 print(f"Type of event_data[0] after error: {type(event_data[0])}, value: {event_data[0]}")
@@ -208,4 +230,8 @@ def generate_annotations(eeg_file, output_dir):
 if __name__ == "__main__":
     eeg_file = '/home/ubuntu/robotics-deepbrain-experiment-1/Physionet EEGMMIDB in MATLAB structure and CSV files to leverage accessibility and exploitation/MATLAB structure/EEGMMIDB_Curated.mat'
     output_dir = '/home/ubuntu/robotics-deepbrain-experiment-1/annotations'
-    generate_annotations(eeg_file, output_dir)
+    strategy = 'mean'  # Default strategy
+    try:
+        generate_annotations(eeg_file, output_dir, strategy)
+    except ValueError as ve:
+        print(f"ValueError encountered: {ve}")
