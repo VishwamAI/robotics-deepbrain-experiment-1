@@ -80,19 +80,11 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         print(f"Original labels shape: {labels.shape}")
         print(f"Original unique labels: {np.unique(labels)}")
 
-        # Reshape data for CSP
         n_samples = band_power_df.shape[0]
         n_channels = band_power_df.shape[1]
         remainder = n_samples % n_channels
         if remainder != 0:
             band_power_df = band_power_df.iloc[:-remainder]
-        n_trials = band_power_df.shape[0] // n_channels  # Adjust for multiple classes
-        if n_trials <= 0:
-            raise ValueError("The number of trials must be greater than zero after trimming.")
-
-        # Log the shapes and unique labels before trimming
-        print(f"Labels shape before trimming: {labels.shape}")
-        print(f"Unique labels before trimming: {np.unique(labels)}")
 
         # Ensure labels match the number of trials
         unique_labels, counts = np.unique(labels, return_counts=True)
@@ -101,6 +93,14 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         for label in unique_labels:
             balanced_labels.extend(labels[labels == label][:min_count])
         labels = np.array(balanced_labels)
+
+        # Recalculate n_trials based on the length of the balanced labels array
+        n_trials = len(labels) // n_channels
+        if n_trials <= 0:
+            raise ValueError("The number of trials must be greater than zero after trimming.")
+
+        # Trim band_power_df to match the new number of trials
+        band_power_df = band_power_df.iloc[:n_trials * n_channels]
 
         # Log the labels array after trimming
         print(f"Labels after trimming: {labels}")
