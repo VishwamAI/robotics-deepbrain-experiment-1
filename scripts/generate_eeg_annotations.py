@@ -40,7 +40,14 @@ def generate_eeg_annotations(eeg_file_path, output_csv_path):
                                             event_data = np.array(sub_dereferenced_data[:])
                                             logging.info(f"Event data shape for {subject}: {event_data.shape}")
                                             for event in event_data:
-                                                if len(event) == 3:
+                                                if len(event) == 1:
+                                                    # Assuming single-element events represent timestamps
+                                                    events.append([subject, event[0], None, None])
+                                                elif len(event) == 2:
+                                                    # Assuming two-element events represent timestamp and event_marker
+                                                    events.append([subject, event[0], event[1], None])
+                                                elif len(event) == 3:
+                                                    # Assuming three-element events represent timestamp, event_marker, and label
                                                     events.append([subject] + list(event))
                                                 else:
                                                     logging.warning(f"Unexpected event data length for {subject}: {event}")
