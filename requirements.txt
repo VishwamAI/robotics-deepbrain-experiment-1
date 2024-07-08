@@ -42,7 +42,7 @@ google-pasta==0.2.0
 greenlet==3.0.3
 grpcio==1.64.1
 h5py==3.11.0
-hibagent==1.0.1
+# Removed hibagent==1.0.1 as it is not available in PyPI and is a system-level package
 httplib2==0.20.2
 hyperlink==21.0.0
 idna==3.3
