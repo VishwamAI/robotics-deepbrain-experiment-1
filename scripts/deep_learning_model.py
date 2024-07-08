@@ -15,18 +15,18 @@ def state_transition_model(state_vector, transition_matrix, process_noise_cov):
     State transition model for the multicore BPF approach.
 
     Args:
-    state_vector (np.ndarray): Current state vector (3D coordinates).
-    transition_matrix (np.ndarray): State transition matrix.
-    process_noise_cov (np.ndarray): Process noise covariance matrix.
+    state_vector (tf.Tensor): Current state vector (3D coordinates).
+    transition_matrix (tf.Tensor): State transition matrix.
+    process_noise_cov (tf.Tensor): Process noise covariance matrix.
 
     Returns:
-    np.ndarray: Updated state vector based on the state transition model.
+    tf.Tensor: Updated state vector based on the state transition model.
     """
     # Apply the state transition matrix
-    updated_state_vector = np.dot(transition_matrix, state_vector)
+    updated_state_vector = tf.linalg.matmul(transition_matrix, state_vector)
 
     # Add process noise
-    process_noise = np.random.multivariate_normal(np.zeros(state_vector.shape[0]), process_noise_cov)
+    process_noise = tf.random.normal(shape=state_vector.shape, mean=0.0, stddev=tf.sqrt(process_noise_cov))
     updated_state_vector += process_noise
 
     return updated_state_vector
@@ -36,13 +36,13 @@ def eeg_measurement_model(state_vector, forward_matrix):
     EEG measurement model for the multicore BPF approach.
 
     Args:
-    state_vector (np.ndarray): Current state vector (3D coordinates).
-    forward_matrix (np.ndarray): Forward matrix for the head model.
+    state_vector (tf.Tensor): Current state vector (3D coordinates).
+    forward_matrix (tf.Tensor): Forward matrix for the head model.
 
     Returns:
-    np.ndarray: Predicted EEG measurements based on the state vector.
+    tf.Tensor: Predicted EEG measurements based on the state vector.
     """
-    predicted_measurements = np.dot(forward_matrix, state_vector)
+    predicted_measurements = tf.linalg.matmul(forward_matrix, state_vector)
     return predicted_measurements
 
 def apply_spatial_filter(eeg_data, filter_matrices):
@@ -50,19 +50,19 @@ def apply_spatial_filter(eeg_data, filter_matrices):
     Apply a spatial filter to the EEG data based on beamforming principles.
 
     Args:
-    eeg_data (np.ndarray): Input EEG data (timesteps, channels).
-    filter_matrices (np.ndarray): Time-dependent spatial filter matrices (timesteps, channels, channels).
+    eeg_data (tf.Tensor): Input EEG data (timesteps, channels).
+    filter_matrices (tf.Tensor): Time-dependent spatial filter matrices (timesteps, channels, channels).
 
     Returns:
-    np.ndarray: Spatially filtered EEG data.
+    tf.Tensor: Spatially filtered EEG data.
     """
     num_timesteps, num_channels = eeg_data.shape
     if filter_matrices.shape[0] != num_timesteps or filter_matrices.shape[1] != num_channels:
         raise ValueError("The shape of the filter matrices must match the shape of the EEG data.")
 
-    filtered_data = np.zeros_like(eeg_data)
+    filtered_data = tf.zeros_like(eeg_data)
     for t in range(num_timesteps):
-        filtered_data[t, :] = np.dot(filter_matrices[t], eeg_data[t, :])
+        filtered_data[t, :] = tf.linalg.matmul(filter_matrices[t], eeg_data[t, :])
 
     return filtered_data
 
@@ -71,21 +71,21 @@ def generate_beamforming_matrix(eeg_data, forward_matrices, state_transition_mod
     Generate a spatial filter matrix based on beamforming principles.
 
     Args:
-    eeg_data (np.ndarray): Input EEG data (timesteps, channels).
-    forward_matrices (np.ndarray): Precomputed forward matrices for the head model.
+    eeg_data (tf.Tensor): Input EEG data (timesteps, channels).
+    forward_matrices (tf.Tensor): Precomputed forward matrices for the head model.
     state_transition_model (function): State transition model function.
-    transition_matrix (np.ndarray): State transition matrix.
-    process_noise_cov (np.ndarray): Process noise covariance matrix.
+    transition_matrix (tf.Tensor): State transition matrix.
+    process_noise_cov (tf.Tensor): Process noise covariance matrix.
 
     Returns:
-    np.ndarray: Time-dependent spatial filter matrix (timesteps, channels, channels).
+    tf.Tensor: Time-dependent spatial filter matrix (timesteps, channels, channels).
     """
     num_timesteps, num_channels = eeg_data.shape
     if num_channels <= 0:
         raise ValueError("The number of channels must be greater than zero.")
 
     # Initialize the state vector for each time step
-    state_vector = np.zeros((num_timesteps, num_channels, 3))  # Assuming 3D coordinates for each channel
+    state_vector = tf.zeros((num_timesteps, num_channels, 3))  # Assuming 3D coordinates for each channel
 
     # Apply the state transition model for each time step
     for t in range(num_timesteps):
@@ -93,10 +93,10 @@ def generate_beamforming_matrix(eeg_data, forward_matrices, state_transition_mod
             state_vector[t, i] = state_transition_model(state_vector[t, i], transition_matrix, process_noise_cov)
 
     # Compute the beamforming matrix using the forward matrices and state vector
-    filter_matrices = np.zeros((num_timesteps, num_channels, num_channels))
+    filter_matrices = tf.zeros((num_timesteps, num_channels, num_channels))
     for t in range(num_timesteps):
         for i in range(num_channels):
-            filter_matrices[t, i, :] = np.mean(forward_matrices[:, i, :], axis=0) * state_vector[t, i]
+            filter_matrices[t, i, :] = tf.reduce_mean(forward_matrices[:, i, :], axis=0) * state_vector[t, i]
 
     return filter_matrices
 
@@ -127,8 +127,8 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         self.particle_weights.assign(tf.reduce_sum(tf.square(inputs - predicted_measurements), axis=-1))
 
         # Resample particles based on weights
-        resampled_indices = tf.random.categorical(tf.math.log(self.particle_weights), self.num_particles)
-        resampled_state_vector = tf.gather(self.state_vector, resampled_indices)
+        resampled_indices = tf.random.categorical(tf.math.log(tf.expand_dims(self.particle_weights, 0)), self.num_particles)
+        resampled_state_vector = tf.gather(self.state_vector, tf.squeeze(resampled_indices, axis=0))
 
         # Return the mean of the resampled state vector as the single value output
         return tf.reduce_mean(resampled_state_vector, axis=0)
@@ -160,11 +160,11 @@ def create_deep_learning_model(input_shape, transition_matrix, process_noise_cov
 
     # Convolutional layers for feature extraction
     model.add(Conv1D(filters=64, kernel_size=1, activation='relu'))
-    model.add(MaxPooling1D(pool_size=2))
+    model.add(MaxPooling1D(pool_size=1))
     model.add(Dropout(0.5))
 
     model.add(Conv1D(filters=128, kernel_size=1, activation='relu'))
-    model.add(MaxPooling1D(pool_size=2))
+    model.add(MaxPooling1D(pool_size=1))
     model.add(Dropout(0.5))
 
     # LSTM layers for capturing temporal dynamics
