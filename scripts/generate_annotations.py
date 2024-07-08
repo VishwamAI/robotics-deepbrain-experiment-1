@@ -34,7 +34,19 @@ def generate_annotations(eeg_file, output_dir):
             signal_group = f['EEGMMIDB']['Signal']
             for subject in signal_group.keys():
                 print(f"Processing subject: {subject}")
-                raw_data = signal_group[subject][:]  # Adjust this key based on the actual structure of the MATLAB file
+                raw_data = signal_group[subject][:]
+                print(f"Raw data shape for subject {subject}: {raw_data.shape}")
+                print(f"Raw data content for subject {subject}: {raw_data}")
+
+                # Ensure raw_data is fully dereferenced
+                for i in range(raw_data.shape[0]):
+                    for j in range(raw_data.shape[1]):
+                        if isinstance(raw_data[i, j], h5py.Reference):
+                            raw_data[i, j] = f[raw_data[i, j]][()]
+                            if isinstance(raw_data[i, j], np.ndarray):
+                                raw_data[i, j] = raw_data[i, j].item()  # Convert single-element array to scalar
+
+                print(f"Dereferenced raw data content for subject {subject}: {raw_data}")
 
                 # Extract sampling frequency from metadata if available
                 sfreq = 256  # Default value
@@ -45,7 +57,10 @@ def generate_annotations(eeg_file, output_dir):
                 # Create an MNE Raw object from the loaded data
                 ch_names = ['EEG' + str(i) for i in range(raw_data.shape[0])]
                 info = mne.create_info(ch_names=ch_names, sfreq=sfreq)  # Adjust channel names and sampling frequency as needed
+                print(f"Channel names: {ch_names}")
+                print(f"Info object: {info}")
                 raw = mne.io.RawArray(raw_data, info)
+                print(f"Created MNE Raw object for subject {subject}")
 
                 # Check if the stim channel exists
                 if 'STI 014' in raw.ch_names:
@@ -58,11 +73,13 @@ def generate_annotations(eeg_file, output_dir):
                         continue
 
                     print(f"Annotations key found for subject: {subject}")
+                    print(f"Attempting to access annotations for subject: {subject}")
                     try:
                         annotations_refs = f['EEGMMIDB']['Annotations'][subject][0]
                         print(f"Annotations references for subject {subject}: {annotations_refs}")
                         try:
                             stim_data = np.zeros(raw_data.shape[1])
+                            print(f"Initialized stim_data array with shape: {stim_data.shape}")
                         except Exception as e:
                             print(f"Error creating stim_data array: {e}")
                         for ref in annotations_refs:
