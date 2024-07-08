@@ -77,7 +77,7 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         band_power_features = []
         for band in bands:
             low, high = band
-            band_power = normalized_df.apply(lambda x: np.log(np.var(x[(x >= low) & (x <= high)]) + 1e-6), axis=1)
+            band_power = normalized_df.apply(lambda x: np.log(np.var(x[(x >= low) & (x <= high)]) + 1e-6) if np.var(x[(x >= low) & (x <= high)]) != 0 else 0, axis=1)
             band_power_features.append(band_power)
         band_power_df = pd.concat(band_power_features, axis=1)
 
