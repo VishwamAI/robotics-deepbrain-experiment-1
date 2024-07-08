@@ -98,8 +98,7 @@ pyparsing==2.4.7
 pyrsistent==0.18.1
 pyserial==3.5
 # Removed python-apt==2.4.0+ubuntu2 as it is not available in PyPI and is a system-level package
-python-dateutil==2.8.2
-python-debian==0.1.43+ubuntu1.1
+# Removed python-debian==0.1.43+ubuntu1.1 as it is not available in PyPI and is a system-level package
 python-dotenv==0.19.2
 python-magic==0.4.24
 pytz==2022.1
