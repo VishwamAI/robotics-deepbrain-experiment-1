@@ -38,8 +38,8 @@ def process_annotations(annotation_dir, output_file):
             # Extract labels from the annotation file
             for _, row in ann_df.iterrows():
                 event_type = row[0]
-                start_sample = row[3]
-                end_sample = row[4]
+                start_sample = int(row[3])
+                end_sample = int(row[4])
                 labels.extend([event_type] * (end_sample - start_sample + 1))
 
     if not annotation_files_found:
