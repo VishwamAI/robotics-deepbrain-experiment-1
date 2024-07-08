@@ -24,8 +24,11 @@ def state_transition_model(state_vectors, transition_matrix, process_noise_cov):
     """
     updated_state_vectors = tf.linalg.matmul(tf.cast(state_vectors, tf.float64), transition_matrix, transpose_b=True)
     process_noise_cov = tf.cast(process_noise_cov, tf.float32)  # Ensure dtype consistency
-    process_noise = tf.random.normal(shape=state_vectors.shape, mean=0.0, stddev=tf.sqrt(process_noise_cov))
-    updated_state_vectors += process_noise
+    # Verify that process_noise_cov is positive-definite
+    tf.debugging.assert_positive(tf.linalg.det(process_noise_cov), message="process_noise_cov must be positive-definite")
+    process_noise = tf.random.normal(shape=(state_vectors.shape[0], state_vectors.shape[1]), mean=0.0, stddev=1.0)
+    process_noise = tf.linalg.matmul(process_noise, tf.linalg.cholesky(process_noise_cov))  # Generate correlated noise
+    updated_state_vectors = tf.cast(updated_state_vectors, tf.float32) + process_noise
 
     return updated_state_vectors
 
