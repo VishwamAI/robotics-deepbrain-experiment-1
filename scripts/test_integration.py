@@ -63,6 +63,11 @@ if data is not None:
     intensity = predictions[:, 2]
     hologram = generate_hologram(preprocessed_image, position, intensity)
 
+    # Save the generated hologram to a file
+    hologram_output_path = "/home/ubuntu/robotics-deepbrain-experiment-1/output/hologram.png"
+    cv2.imwrite(hologram_output_path, hologram)
+    print(f"Hologram saved to {hologram_output_path}")
+
     # Remove the call to display the generated hologram
     # display_image(hologram, window_name="Hologram")
 else:
