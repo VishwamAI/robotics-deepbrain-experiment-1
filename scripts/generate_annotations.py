@@ -63,6 +63,10 @@ def generate_annotations(eeg_file, output_dir):
                                                 event_data = np.array(sub_dereferenced_data[:])
                                                 if isinstance(event_data[2], h5py.Reference):
                                                     event_data[2] = f[event_data[2]][()]
+                                                if not isinstance(event_data[2], (int, float)):
+                                                    raise ValueError(f"Unexpected data type for event_data[2]: {type(event_data[2])}")
+                                                if not isinstance(event_data[0], (int, float)) or not isinstance(event_data[1], (int, float)):
+                                                    raise ValueError(f"Unexpected data type for event_data[0] or event_data[1]: {type(event_data[0])}, {type(event_data[1])}")
                                                 stim_data[int(event_data[0]):int(event_data[1])] = event_data[2]
                     raw.add_channels([mne.io.RawArray(stim_data[np.newaxis, :], mne.create_info(['STI 014'], sfreq))])
                     stim_channel = 'STI 014'
