@@ -96,6 +96,9 @@ def generate_annotations(eeg_file, output_dir):
                                                                     print(f"Dereferencing event_data[2]: {event_data[2]}")
                                                                     event_data[2] = f[event_data[2]][()]
                                                                     print(f"Dereferenced event_data[2]: {event_data[2]}")
+                                                                    if isinstance(event_data[2], np.ndarray):
+                                                                        event_data[2] = event_data[2].item()  # Convert single-element array to scalar
+                                                                    print(f"Final event_data[2]: {event_data[2]}")
                                                                 else:
                                                                     print(f"event_data[2] is not a reference: {event_data[2]}")
                                                             except Exception as e:
