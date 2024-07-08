@@ -2,9 +2,9 @@ name: Python application
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, devin/deepbrain-experiment-1/11206 ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, devin/deepbrain-experiment-1/11206 ]
 
 jobs:
   build:
