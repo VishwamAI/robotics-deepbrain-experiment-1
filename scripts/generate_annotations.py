@@ -113,8 +113,11 @@ def generate_annotations(eeg_file, output_dir):
                                                                     print(f"Dereferencing event_data[2]: {event_data[2]}")
                                                                     event_data[2] = f[event_data[2]][()]
                                                                     print(f"Dereferenced event_data[2]: {event_data[2]}")
-                                                                    if isinstance(event_data[2], np.ndarray) and event_data[2].size == 1:
-                                                                        event_data[2] = event_data[2].item()  # Convert single-element array to scalar
+                                                                    if isinstance(event_data[2], np.ndarray):
+                                                                        if event_data[2].size == 1:
+                                                                            event_data[2] = event_data[2].item()  # Convert single-element array to scalar
+                                                                        else:
+                                                                            print(f"event_data[2] is not a single-element array: {event_data[2]}")
                                                                     print(f"Final event_data[2]: {event_data[2]}")
                                                                 else:
                                                                     print(f"event_data[2] is not a reference: {event_data[2]}")
@@ -123,7 +126,10 @@ def generate_annotations(eeg_file, output_dir):
                                                                     event_data[0] = f[event_data[0]][()]
                                                                     print(f"Dereferenced event_data[0]: {event_data[0]}")
                                                                     if isinstance(event_data[0], np.ndarray):
-                                                                        event_data[0] = event_data[0].item()  # Convert single-element array to scalar
+                                                                        if event_data[0].size == 1:
+                                                                            event_data[0] = event_data[0].item()  # Convert single-element array to scalar
+                                                                        else:
+                                                                            print(f"event_data[0] is not a single-element array: {event_data[0]}")
                                                                     print(f"Final event_data[0]: {event_data[0]}")
                                                                 else:
                                                                     print(f"event_data[0] is not a reference: {event_data[0]}")
@@ -132,7 +138,10 @@ def generate_annotations(eeg_file, output_dir):
                                                                     event_data[1] = f[event_data[1]][()]
                                                                     print(f"Dereferenced event_data[1]: {event_data[1]}")
                                                                     if isinstance(event_data[1], np.ndarray):
-                                                                        event_data[1] = event_data[1].item()  # Convert single-element array to scalar
+                                                                        if event_data[1].size == 1:
+                                                                            event_data[1] = event_data[1].item()  # Convert single-element array to scalar
+                                                                        else:
+                                                                            print(f"event_data[1] is not a single-element array: {event_data[1]}")
                                                                     print(f"Final event_data[1]: {event_data[1]}")
                                                                 else:
                                                                     print(f"event_data[1] is not a reference: {event_data[1]}")
