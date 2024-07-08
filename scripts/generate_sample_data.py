@@ -90,8 +90,10 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         unique_labels, counts = np.unique(labels, return_counts=True)
         min_count = min(counts)
         balanced_labels = []
-        for label in unique_labels:
-            balanced_labels.extend(labels[labels == label][:min_count])
+        label_indices = {label: np.where(labels == label)[0] for label in unique_labels}
+        for i in range(min_count):
+            for label in unique_labels:
+                balanced_labels.append(labels[label_indices[label][i]])
         labels = np.array(balanced_labels)
 
         # Recalculate n_trials based on the length of the balanced labels array
