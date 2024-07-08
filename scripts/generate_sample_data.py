@@ -81,7 +81,7 @@ def generate_sample_data(input_file, output_file, labels_file, sample_size=1000,
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    input_file = 'Physionet EEGMMIDB in MATLAB structure and CSV files to leverage accessibility and exploitation/CSV files/SUB_001_SIG_01.csv'
+    input_file = '/home/ubuntu/robotics-deepbrain-experiment-1/Physionet EEGMMIDB in MATLAB structure and CSV files to leverage accessibility and exploitation/CSV files/SUB_001_SIG_01.csv'
     output_file = 'sample_data.csv'
     labels_file = 'processed_labels.csv'
     generate_sample_data(input_file, output_file, labels_file)
