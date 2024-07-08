@@ -23,6 +23,7 @@ def state_transition_model(state_vectors, transition_matrix, process_noise_cov):
     tf.Tensor: Updated state vectors based on the state transition model.
     """
     updated_state_vectors = tf.linalg.matmul(tf.cast(state_vectors, tf.float64), transition_matrix, transpose_b=True)
+    process_noise_cov = tf.cast(process_noise_cov, tf.float32)  # Ensure dtype consistency
     process_noise = tf.random.normal(shape=state_vectors.shape, mean=0.0, stddev=tf.sqrt(process_noise_cov))
     updated_state_vectors += process_noise
 
