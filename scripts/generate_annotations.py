@@ -7,6 +7,7 @@ import numpy as np
 def generate_annotations(eeg_file, output_dir):
     version = "1.0.1"
     print(f"Starting generate_annotations (version {version}) with eeg_file: {eeg_file} and output_dir: {output_dir}")
+    print("Script execution started.")
     """
     Generate annotation files from EEG data.
 
