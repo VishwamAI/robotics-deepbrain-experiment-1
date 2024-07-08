@@ -5,16 +5,16 @@ from sklearn.decomposition import PCA
 from mne.decoding import CSP
 import os
 
-def generate_sample_data(input_file, output_file, labels_file, sample_size=1000, chunk_size=10000):
+def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, chunk_size=10000):
     """
-    Generate a sample dataset from the input EEG data file.
+    Generate a sample dataset from the input EEG data files.
 
     Args:
-    input_file (str): Path to the input EEG data file.
+    input_dir (str): Directory containing the input EEG data files.
     output_file (str): Path to save the generated sample data.
     labels_file (str): Path to the processed labels file.
     sample_size (int): Number of samples to include in the generated dataset.
-    chunk_size (int): Number of rows to read at a time from the input file.
+    chunk_size (int): Number of rows to read at a time from the input files.
 
     Returns:
     None
@@ -23,14 +23,37 @@ def generate_sample_data(input_file, output_file, labels_file, sample_size=1000,
         # Initialize an empty DataFrame to store the sample data
         sample_df = pd.DataFrame()
 
-        # Read the data in chunks
-        for chunk in pd.read_csv(input_file, chunksize=chunk_size):
-            sample_df = pd.concat([sample_df, chunk])
-            if len(sample_df) >= sample_size:
-                break
+        # Load processed labels
+        labels_df = pd.read_csv(labels_file)
+        labels = labels_df['Label'].values
+
+        # Iterate over signal files in the input directory
+        for filename in os.listdir(input_dir):
+            if "_sig" in filename.lower() and filename.lower().endswith(".csv"):
+                file_path = os.path.join(input_dir, filename)
+                print(f"Processing file: {file_path}")
+
+                # Read the data in chunks
+                for chunk in pd.read_csv(file_path, chunksize=chunk_size):
+                    sample_df = pd.concat([sample_df, chunk])
+                    if len(sample_df) >= sample_size:
+                        break
+
+                if len(sample_df) >= sample_size:
+                    break
 
         # Trim the sample data to the desired sample size
         sample_df = sample_df.head(sample_size)
+
+        # Ensure the labels match the sample data length
+        if len(labels) < len(sample_df):
+            labels = np.resize(labels, len(sample_df))
+        elif len(labels) > len(sample_df):
+            labels = labels[:len(sample_df)]
+
+        # Log the shapes of the data and labels
+        print(f"Sample data shape: {sample_df.shape}")
+        print(f"Labels shape: {labels.shape}")
 
         # Normalize the data
         scaler = StandardScaler()
@@ -46,10 +69,6 @@ def generate_sample_data(input_file, output_file, labels_file, sample_size=1000,
             band_power_features.append(band_power)
         band_power_df = pd.concat(band_power_features, axis=1)
 
-        # Load processed labels
-        labels_df = pd.read_csv(labels_file)
-        labels = labels_df['Label'].values[:band_power_df.shape[0]]
-
         # Ensure there are multiple unique labels
         unique_labels = np.unique(labels)
         if len(unique_labels) < 2:
@@ -59,7 +78,16 @@ def generate_sample_data(input_file, output_file, labels_file, sample_size=1000,
         n_samples = band_power_df.shape[0]
         n_channels = band_power_df.shape[1]
         n_trials = n_samples // len(unique_labels)  # Adjust for multiple classes
+        remainder = n_samples % len(unique_labels)
+        if remainder != 0:
+            band_power_df = band_power_df.iloc[:-remainder]
+            labels = labels[:n_trials * len(unique_labels)]
+        labels = labels[:n_trials]  # Ensure labels are one-dimensional and match the number of trials
         band_power_3d = band_power_df.values.reshape((n_trials, len(unique_labels), n_channels))
+
+        # Log the shapes of the reshaped data and labels
+        print(f"Band power 3D shape: {band_power_3d.shape}")
+        print(f"Labels shape after trimming: {labels.shape}")
 
         # Apply CSP
         csp = CSP(n_components=4)
@@ -76,12 +104,12 @@ def generate_sample_data(input_file, output_file, labels_file, sample_size=1000,
         print(f"Sample data generated and saved to {output_file}")
 
     except FileNotFoundError:
-        print(f"File not found: {input_file}")
+        print(f"File not found: {input_dir}")
     except Exception as e:
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    input_file = '/home/ubuntu/robotics-deepbrain-experiment-1/Physionet EEGMMIDB in MATLAB structure and CSV files to leverage accessibility and exploitation/CSV files/SUB_001_SIG_01.csv'
+    input_dir = '/home/ubuntu/robotics-deepbrain-experiment-1/datasets'
     output_file = 'sample_data.csv'
     labels_file = 'processed_labels.csv'
-    generate_sample_data(input_file, output_file, labels_file)
+    generate_sample_data(input_dir, output_file, labels_file)
