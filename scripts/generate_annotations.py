@@ -85,9 +85,12 @@ def generate_annotations(eeg_file, output_dir):
                                                             print(f"Event data before assignment: {event_data}")
                                                             print(f"Type of event_data[2] before dereferencing: {type(event_data[2])}, value: {event_data[2]}")
                                                             try:
-                                                                print(f"Dereferencing event_data[2]: {event_data[2]}")
-                                                                event_data[2] = f[event_data[2]][()]
-                                                                print(f"Dereferenced event_data[2]: {event_data[2]}")
+                                                                if isinstance(event_data[2], h5py.Reference):
+                                                                    print(f"Dereferencing event_data[2]: {event_data[2]}")
+                                                                    event_data[2] = f[event_data[2]][()]
+                                                                    print(f"Dereferenced event_data[2]: {event_data[2]}")
+                                                                else:
+                                                                    print(f"event_data[2] is not a reference: {event_data[2]}")
                                                             except Exception as e:
                                                                 print(f"Error dereferencing event_data[2]: {e}")
                                                                 print(f"Type of event_data[2] after error: {type(event_data[2])}, value: {event_data[2]}")
