@@ -25,14 +25,18 @@ def generate_annotations(eeg_file, output_dir):
             if 'EEGMMIDB' not in f.keys() or 'Signal' not in f['EEGMMIDB'].keys():
                 raise KeyError("Expected keys 'EEGMMIDB' or 'Signal' not found in the HDF5 file.")
 
+            print("Loaded HDF5 file successfully.")
+
             signal_group = f['EEGMMIDB']['Signal']
             for subject in signal_group.keys():
+                print(f"Processing subject: {subject}")
                 raw_data = signal_group[subject][:]  # Adjust this key based on the actual structure of the MATLAB file
 
                 # Extract sampling frequency from metadata if available
                 sfreq = 256  # Default value
                 if 'Frequency' in f['EEGMMIDB'].keys():
                     sfreq = f['EEGMMIDB']['Frequency'][0, 0]
+                print(f"Sampling frequency: {sfreq}")
 
                 # Create an MNE Raw object from the loaded data
                 ch_names = ['EEG' + str(i) for i in range(raw_data.shape[0])]
@@ -54,13 +58,16 @@ def generate_annotations(eeg_file, output_dir):
                     for ref in annotations_refs:
                         if isinstance(ref, h5py.Reference):
                             dereferenced_data = f[ref]
+                            print(f"Dereferenced data for ref: {ref}")
                             for sub_ref in dereferenced_data:
                                 if isinstance(sub_ref, np.ndarray):
                                     for actual_ref in sub_ref:
                                         if isinstance(actual_ref, h5py.Reference):
                                             sub_dereferenced_data = f[actual_ref]
+                                            print(f"Dereferenced data for actual_ref: {actual_ref}")
                                             if isinstance(sub_dereferenced_data, h5py.Dataset):
                                                 event_data = np.array(sub_dereferenced_data[:])
+                                                print(f"Event data: {event_data}")
                                                 if isinstance(event_data[2], h5py.Reference):
                                                     event_data[2] = f[event_data[2]][()]
                                                 if not isinstance(event_data[2], (int, float)):
