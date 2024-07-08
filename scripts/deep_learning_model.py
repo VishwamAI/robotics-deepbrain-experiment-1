@@ -101,6 +101,12 @@ def generate_beamforming_matrix(eeg_data, forward_matrices, state_transition_mod
     return filter_matrices
 
 class MulticoreBPFLayer(tf.keras.layers.Layer):
+    """
+    Custom TensorFlow layer implementing a multicore Bayesian Particle Filter (BPF).
+
+    This layer applies a state transition model, computes particle weights based on EEG measurements,
+    resamples particles, and returns the mean of the resampled state vector as a single value output.
+    """
     def __init__(self, num_particles, transition_matrix, process_noise_cov, forward_matrix, **kwargs):
         super(MulticoreBPFLayer, self).__init__(**kwargs)
         self.num_particles = num_particles
@@ -124,7 +130,8 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         resampled_indices = tf.random.categorical(tf.math.log(self.particle_weights), self.num_particles)
         resampled_state_vector = tf.gather(self.state_vector, resampled_indices)
 
-        return resampled_state_vector
+        # Return the mean of the resampled state vector as the single value output
+        return tf.reduce_mean(resampled_state_vector, axis=0)
 
 def create_deep_learning_model(input_shape, transition_matrix, process_noise_cov, forward_matrix):
     """
@@ -137,7 +144,7 @@ def create_deep_learning_model(input_shape, transition_matrix, process_noise_cov
     forward_matrix (np.ndarray): Forward matrix for the head model.
 
     Returns:
-    tf.keras.Model: Compiled deep learning model that outputs 3 continuous values for hologram parameters.
+    tf.keras.Model: Compiled deep learning model that outputs a single continuous value per sample.
 
     Note:
     This function has been updated to better reflect the specific requirements
@@ -170,7 +177,7 @@ def create_deep_learning_model(input_shape, transition_matrix, process_noise_cov
     model.add(MulticoreBPFLayer(num_particles=100, transition_matrix=transition_matrix, process_noise_cov=process_noise_cov, forward_matrix=forward_matrix))
 
     # Output layer for source locations (3D coordinates) and waveforms
-    model.add(Dense(6, activation='linear'))  # Change output layer to produce 6 values (3 for location, 3 for waveform) with linear activation
+    model.add(Dense(1, activation='linear'))  # Change output layer to produce 1 value per sample with linear activation
 
     # Compile the model
     model.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error', metrics=[])
@@ -229,7 +236,7 @@ def train_model(model, data, labels, epochs=10, batch_size=32, validation_split=
     Args:
     model (tf.keras.Model): Compiled deep learning model.
     data (np.ndarray): Training data (timesteps, features).
-    labels (dict): Training labels with keys 'position' and 'intensity'.
+    labels (np.ndarray): Training labels.
     epochs (int): Number of training epochs.
     batch_size (int): Batch size for training.
     validation_split (float): Fraction of the training data to be used as validation data.
@@ -237,13 +244,10 @@ def train_model(model, data, labels, epochs=10, batch_size=32, validation_split=
     Returns:
     tf.keras.callbacks.History: Training history.
     """
-    # Combine the labels into a single array for training
-    combined_labels = np.hstack((labels['position'], labels['intensity'].reshape(-1, 1)))
-
     if validation_split > 0.0:
-        history = model.fit(data, combined_labels, epochs=epochs, batch_size=batch_size, validation_split=validation_split)
+        history = model.fit(data, labels, epochs=epochs, batch_size=batch_size, validation_split=validation_split)
     else:
-        history = model.fit(data, combined_labels, epochs=epochs, batch_size=batch_size)
+        history = model.fit(data, labels, epochs=epochs, batch_size=batch_size)
 
     return history
 
@@ -271,22 +275,18 @@ def predict(model, data):
     return predictions
 
 if __name__ == "__main__":
-    # Load preprocessed data
-    csv_dir = 'Physionet EEGMMIDB in MATLAB structure and CSV files to leverage accessibility and exploitation/CSV files/'
-    sample_file = 'SUB_001_SIG_01.csv'
-    file_path = os.path.join(csv_dir, sample_file)
+    # Load the generated sample data
+    sample_data_file = 'sample_data.csv'
+    sample_data_df = pd.read_csv(sample_data_file)
+    data = sample_data_df.values
 
-    # Load the data to determine the number of samples
-    df = load_csv_data_in_chunks(file_path)
-    data = df.values
-
-    # Example labels for CSP and LDA
-    labels = np.random.randint(0, 2, size=(data.shape[0],))
+    # Load the processed labels
+    labels_file = 'processed_labels.csv'
+    labels_df = pd.read_csv(labels_file)
+    labels = labels_df['Label'].values
 
     # Example forward matrices (replace with actual forward matrices)
     forward_matrices = np.random.rand(10, 64, 64)  # Example shape (num_matrices, channels, channels)
-
-    data = load_preprocessed_data(data, labels, forward_matrices, state_transition_model)
 
     # Initialize the transition matrix and process noise covariance matrix
     transition_matrix = np.eye(3)  # Example transition matrix (identity matrix)
@@ -299,14 +299,6 @@ if __name__ == "__main__":
     input_shape = data.shape[1:]
     model = create_deep_learning_model(input_shape, transition_matrix, process_noise_cov, forward_matrix)
     model.summary()
-
-    # Example labels (3 values for hologram generation)
-    labels = {
-        "position": np.random.rand(data.shape[0], 2),
-        "intensity": np.random.rand(data.shape[0])
-    }
-
-    # TODO: Replace random labels with actual EEG data and corresponding hologram parameters
 
     # Train the model
     history = train_model(model, data, labels)
