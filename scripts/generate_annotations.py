@@ -95,6 +95,7 @@ def generate_annotations(eeg_file, output_dir):
                                                             print(f"Type of event_data[1]: {type(event_data[1])}, value: {event_data[1]}")
                                                             print(f"Type of event_data[2]: {type(event_data[2])}, value: {event_data[2]}")
                                                             if not isinstance(event_data[2], (int, float)):
+                                                                print(f"Unexpected data type for event_data[2]: {type(event_data[2])}, value: {event_data[2]}")
                                                                 raise ValueError(f"Unexpected data type for event_data[2]: {type(event_data[2])}")
                                                             if not isinstance(event_data[0], (int, float)) or not isinstance(event_data[1], (int, float)):
                                                                 raise ValueError(f"Unexpected data type for event_data[0] or event_data[1]: {type(event_data[0])}, {type(event_data[1])}")
