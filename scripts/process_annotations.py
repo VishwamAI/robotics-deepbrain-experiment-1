@@ -22,6 +22,9 @@ def process_annotations(annotation_dir, output_file):
     # Print the current working directory
     print(f"Current working directory: {os.getcwd()}")
 
+    # Print the annotation directory path
+    print(f"Annotation directory: {annotation_dir}")
+
     # Iterate over annotation files in the directory
     annotation_files_found = False
     for filename in os.listdir(annotation_dir):
@@ -49,6 +52,6 @@ def process_annotations(annotation_dir, output_file):
     print(f"Labels processed and saved to {output_file}")
 
 if __name__ == "__main__":
-    annotation_dir = 'Physionet EEGMMIDB in MATLAB structure and CSV files to leverage accessibility and exploitation/CSV files/'
+    annotation_dir = os.path.abspath('Physionet EEGMMIDB in MATLAB structure and CSV files to leverage accessibility and exploitation/CSV files/')
     output_file = 'processed_labels.csv'
     process_annotations(annotation_dir, output_file)
