@@ -75,23 +75,52 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         if len(unique_labels) < 2:
             raise ValueError("The labels file must contain at least two unique classes for CSP.")
 
+        # Log the original shapes of the data and labels
+        print(f"Original sample data shape: {sample_df.shape}")
+        print(f"Original labels shape: {labels.shape}")
+        print(f"Original unique labels: {np.unique(labels)}")
+
         # Reshape data for CSP
         n_samples = band_power_df.shape[0]
         n_channels = band_power_df.shape[1]
-        n_trials = n_samples // len(unique_labels)  # Adjust for multiple classes
-        remainder = n_samples % len(unique_labels)
+        remainder = n_samples % n_channels
         if remainder != 0:
             band_power_df = band_power_df.iloc[:-remainder]
-            labels = labels[:n_trials * len(unique_labels)]
-        labels = labels[:n_trials * len(unique_labels)]  # Ensure labels match the number of trials
+        n_trials = band_power_df.shape[0] // n_channels  # Adjust for multiple classes
+        if n_trials <= 0:
+            raise ValueError("The number of trials must be greater than zero after trimming.")
+
+        # Log the shapes and unique labels before trimming
+        print(f"Labels shape before trimming: {labels.shape}")
+        print(f"Unique labels before trimming: {np.unique(labels)}")
+
+        # Ensure labels match the number of trials
+        unique_labels, counts = np.unique(labels, return_counts=True)
+        min_count = min(counts)
+        balanced_labels = []
+        for label in unique_labels:
+            balanced_labels.extend(labels[labels == label][:min_count])
+        labels = np.array(balanced_labels)
+
+        # Log the labels array after trimming
+        print(f"Labels after trimming: {labels}")
+
+        # Log the shapes and unique labels after trimming
+        print(f"Labels shape after trimming: {labels.shape}")
+        print(f"Unique labels after trimming: {np.unique(labels)}")
+
         unique_labels_after_trim = np.unique(labels)
         if len(unique_labels_after_trim) < 2:
             raise ValueError("The trimmed labels must contain at least two unique classes for CSP.")
-        band_power_3d = band_power_df.values.reshape((n_trials, len(unique_labels), n_channels))
+        if len(unique_labels_after_trim) != len(unique_labels):
+            raise ValueError(f"The number of unique labels after trimming ({len(unique_labels_after_trim)}) does not match the expected count ({len(unique_labels)}).")
+        band_power_3d = band_power_df.values.reshape((n_trials, n_channels, -1))  # Reshape to (trials, channels, time)
 
         # Log the shapes of the reshaped data and labels
         print(f"Band power 3D shape: {band_power_3d.shape}")
         print(f"Labels shape after trimming: {labels.shape}")
+        print(f"Number of trials: {n_trials}")
+        print(f"Unique labels after trimming: {unique_labels_after_trim}")
 
         # Apply CSP
         csp = CSP(n_components=4)
