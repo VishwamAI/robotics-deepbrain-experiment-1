@@ -5,6 +5,8 @@ import os
 import numpy as np
 
 def generate_annotations(eeg_file, output_dir):
+    version = "1.0.1"
+    print(f"Starting generate_annotations (version {version}) with eeg_file: {eeg_file} and output_dir: {output_dir}")
     """
     Generate annotation files from EEG data.
 
@@ -82,7 +84,9 @@ def generate_annotations(eeg_file, output_dir):
                                                             print(f"Event data before assignment: {event_data}")
                                                             if isinstance(event_data[2], h5py.Reference):
                                                                 try:
+                                                                    print(f"Dereferencing event_data[2]: {event_data[2]}")
                                                                     event_data[2] = f[event_data[2]][()]
+                                                                    print(f"Dereferenced event_data[2]: {event_data[2]}")
                                                                 except Exception as e:
                                                                     print(f"Error dereferencing event_data[2]: {e}")
                                                             print(f"Event data[2] after dereferencing: {event_data[2]}")
