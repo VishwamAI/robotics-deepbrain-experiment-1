@@ -47,6 +47,7 @@ def generate_annotations(eeg_file, output_dir):
                                 raw_data[i, j] = raw_data[i, j].item()  # Convert single-element array to scalar
 
                 print(f"Dereferenced raw data content for subject {subject}: {raw_data}")
+                print(f"Type of raw_data: {type(raw_data)}, shape: {raw_data.shape}")
 
                 # Extract sampling frequency from metadata if available
                 sfreq = 256  # Default value
@@ -79,9 +80,10 @@ def generate_annotations(eeg_file, output_dir):
                         print(f"Annotations references for subject {subject}: {annotations_refs}")
                         try:
                             stim_data = np.zeros(raw_data.shape[1])
-                            print(f"Initialized stim_data array with shape: {stim_data.shape}")
+                            print(f"Initialized stim_data array with shape: {stim_data.shape}, type: {type(stim_data)}")
                         except Exception as e:
                             print(f"Error creating stim_data array: {e}")
+                            continue
                         for ref in annotations_refs:
                             print(f"Type of ref: {type(ref)}, value: {ref}")
                             if isinstance(ref, h5py.Reference):
@@ -114,6 +116,7 @@ def generate_annotations(eeg_file, output_dir):
                                                                     event_data[2] = f[event_data[2]][()]
                                                                     print(f"Dereferenced event_data[2]: {event_data[2]}")
                                                                     if isinstance(event_data[2], np.ndarray):
+                                                                        print(f"Size of event_data[2] before conversion: {event_data[2].size}")
                                                                         if event_data[2].size == 1:
                                                                             event_data[2] = event_data[2].item()  # Convert single-element array to scalar
                                                                         else:
@@ -126,6 +129,7 @@ def generate_annotations(eeg_file, output_dir):
                                                                     event_data[0] = f[event_data[0]][()]
                                                                     print(f"Dereferenced event_data[0]: {event_data[0]}")
                                                                     if isinstance(event_data[0], np.ndarray):
+                                                                        print(f"Size of event_data[0] before conversion: {event_data[0].size}")
                                                                         if event_data[0].size == 1:
                                                                             event_data[0] = event_data[0].item()  # Convert single-element array to scalar
                                                                         else:
@@ -138,6 +142,7 @@ def generate_annotations(eeg_file, output_dir):
                                                                     event_data[1] = f[event_data[1]][()]
                                                                     print(f"Dereferenced event_data[1]: {event_data[1]}")
                                                                     if isinstance(event_data[1], np.ndarray):
+                                                                        print(f"Size of event_data[1] before conversion: {event_data[1].size}")
                                                                         if event_data[1].size == 1:
                                                                             event_data[1] = event_data[1].item()  # Convert single-element array to scalar
                                                                         else:
@@ -161,9 +166,13 @@ def generate_annotations(eeg_file, output_dir):
                                                                 raise ValueError(f"Unexpected data type for event_data[0] or event_data[1]: {type(event_data[0])}, {type(event_data[1])}")
                                                             print(f"Assigning event_data[2] to stim_data[{int(event_data[0])}:{int(event_data[1])}]")
                                                             try:
-                                                                print(f"stim_data before assignment: {stim_data[int(event_data[0]):int(event_data[1])]}")
-                                                                stim_data[int(event_data[0]):int(event_data[1])] = event_data[2]
-                                                                print(f"stim_data after assignment: {stim_data[int(event_data[0]):int(event_data[1])]}")
+                                                                start_idx = int(event_data[0])
+                                                                end_idx = int(event_data[1])
+                                                                if start_idx < 0 or end_idx > len(stim_data):
+                                                                    raise IndexError(f"Index out of bounds: start_idx={start_idx}, end_idx={end_idx}, stim_data length={len(stim_data)}")
+                                                                print(f"stim_data before assignment: {stim_data[start_idx:end_idx]}")
+                                                                stim_data[start_idx:end_idx] = event_data[2]
+                                                                print(f"stim_data after assignment: {stim_data[start_idx:end_idx]}, assigned value: {event_data[2]}")
                                                             except Exception as e:
                                                                 print(f"Error assigning event_data[2] to stim_data: {e}")
                                                     except Exception as e:
