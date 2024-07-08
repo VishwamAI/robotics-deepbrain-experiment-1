@@ -70,6 +70,9 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         normalized_data = scaler.fit_transform(sample_df)
         normalized_df = pd.DataFrame(normalized_data, columns=sample_df.columns)
 
+        # Log the shapes after normalization
+        print(f"Normalized data shape: {normalized_df.shape}")
+
         # Check for NaNs or infinite values in the normalized data
         if normalized_df.isnull().values.any() or np.isinf(normalized_df.values).any():
             print("Normalized data contains NaNs or infinite values. Handling them...")
