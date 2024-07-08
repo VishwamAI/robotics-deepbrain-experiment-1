@@ -83,6 +83,9 @@ def generate_annotations(eeg_file, output_dir):
                                                                 except Exception as e:
                                                                     print(f"Error dereferencing event_data[2]: {e}")
                                                             print(f"Event data[2] after dereferencing: {event_data[2]}")
+                                                            print(f"Type of event_data[0]: {type(event_data[0])}, value: {event_data[0]}")
+                                                            print(f"Type of event_data[1]: {type(event_data[1])}, value: {event_data[1]}")
+                                                            print(f"Type of event_data[2]: {type(event_data[2])}, value: {event_data[2]}")
                                                             if not isinstance(event_data[2], (int, float)):
                                                                 raise ValueError(f"Unexpected data type for event_data[2]: {type(event_data[2])}")
                                                             if not isinstance(event_data[0], (int, float)) or not isinstance(event_data[1], (int, float)):
