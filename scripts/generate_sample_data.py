@@ -83,7 +83,10 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         if remainder != 0:
             band_power_df = band_power_df.iloc[:-remainder]
             labels = labels[:n_trials * len(unique_labels)]
-        labels = labels[:n_trials]  # Ensure labels are one-dimensional and match the number of trials
+        labels = labels[:n_trials * len(unique_labels)]  # Ensure labels match the number of trials
+        unique_labels_after_trim = np.unique(labels)
+        if len(unique_labels_after_trim) < 2:
+            raise ValueError("The trimmed labels must contain at least two unique classes for CSP.")
         band_power_3d = band_power_df.values.reshape((n_trials, len(unique_labels), n_channels))
 
         # Log the shapes of the reshaped data and labels
