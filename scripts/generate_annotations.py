@@ -121,6 +121,8 @@ def generate_annotations(eeg_file, output_dir):
                                                                             event_data[2] = event_data[2].item()  # Convert single-element array to scalar
                                                                         else:
                                                                             print(f"event_data[2] is not a single-element array: {event_data[2]}")
+                                                                            # Handle the case where event_data[2] is not a single-element array
+                                                                            event_data[2] = event_data[2][0]  # For now, take the first element
                                                                     print(f"Final event_data[2]: {event_data[2]}")
                                                                 else:
                                                                     print(f"event_data[2] is not a reference: {event_data[2]}")
