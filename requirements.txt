@@ -115,7 +115,7 @@ SecretStorage==3.3.1
 service-identity==18.1.0
 six==1.16.0
 smmap==5.0.1
-sos==4.5.6
+sos==0.25.1
 ssh-import-id==5.11
 streamlit==1.31.0
 systemd-python==234
