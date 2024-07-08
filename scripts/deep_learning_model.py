@@ -9,6 +9,44 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.preprocessing import StandardScaler
 from mne.decoding import CSP
 
+def apply_spatial_filter(eeg_data, filter_matrix):
+    """
+    Apply a spatial filter to the EEG data based on beamforming principles.
+
+    Args:
+    eeg_data (np.ndarray): Input EEG data (channels, timesteps).
+    filter_matrix (np.ndarray): Spatial filter matrix (channels, channels).
+
+    Returns:
+    np.ndarray: Spatially filtered EEG data.
+    """
+    if eeg_data.shape[1] != filter_matrix.shape[0]:
+        raise ValueError("The number of channels in the EEG data must match the number of rows in the filter matrix.")
+    filtered_data = np.dot(filter_matrix, eeg_data.T).T
+    return filtered_data
+
+def generate_beamforming_matrix(eeg_data, forward_matrices):
+    """
+    Generate a spatial filter matrix based on beamforming principles.
+
+    Args:
+    eeg_data (np.ndarray): Input EEG data (channels, timesteps).
+    forward_matrices (np.ndarray): Precomputed forward matrices for the head model.
+
+    Returns:
+    np.ndarray: Spatial filter matrix (channels, channels).
+    """
+    num_channels = eeg_data.shape[1]
+    if num_channels <= 0:
+        raise ValueError("The number of channels must be greater than zero.")
+
+    # Compute the beamforming matrix using the forward matrices
+    filter_matrix = np.zeros((num_channels, num_channels))
+    for i in range(num_channels):
+        filter_matrix[i, i] = 1  # Placeholder for actual beamforming computation
+
+    return filter_matrix
+
 def create_deep_learning_model(input_shape):
     """
     Create a deep learning model for EEG data interpretation and hologram generation.
@@ -18,6 +56,11 @@ def create_deep_learning_model(input_shape):
 
     Returns:
     tf.keras.Model: Compiled deep learning model that outputs 3 continuous values for hologram parameters.
+
+    Note:
+    This function may need to be updated to better reflect the specific requirements
+    of the multicore BPF method, potentially incorporating custom layers or loss functions
+    that align with the particle filter approach.
     """
     model = Sequential()
 
@@ -54,7 +97,7 @@ def create_deep_learning_model(input_shape):
 
 def load_preprocessed_data(file_path, labels, n_components=4):
     """
-    Load preprocessed EEG data from a CSV file, normalize it, and apply CSP and LDA.
+    Load preprocessed EEG data from a CSV file, apply spatial filtering, normalize it, and apply CSP and LDA.
 
     Args:
     file_path (str): Path to the CSV file.
@@ -63,13 +106,29 @@ def load_preprocessed_data(file_path, labels, n_components=4):
 
     Returns:
     np.ndarray: Loaded, normalized, and processed data as a 2D NumPy array (timesteps, features).
+
+    Note:
+    This function will be updated to integrate the actual beamforming algorithm
+    for generating the spatial filter matrix. The subsequent processing steps
+    (normalization, CSP, and LDA) will remain the same but will operate on the
+    spatially filtered data produced by the beamforming approach.
     """
     df = pd.read_csv(file_path)
     data = df.values
 
+    # Validate labels
+    if len(labels) != data.shape[0]:
+        raise ValueError("The number of labels must match the number of samples in the data.")
+
+    # Generate beamforming matrix
+    filter_matrix = generate_beamforming_matrix(data)
+
+    # Apply spatial filter
+    filtered_data = apply_spatial_filter(data, filter_matrix)
+
     # Normalize the data
     scaler = StandardScaler()
-    normalized_data = scaler.fit_transform(data)
+    normalized_data = scaler.fit_transform(filtered_data)
 
     # Apply CSP
     csp = CSP(n_components=n_components)
@@ -116,6 +175,11 @@ def predict(model, data):
 
     Returns:
     np.ndarray: Model predictions for hologram parameters.
+
+    Note:
+    This function will be updated to handle outputs from an enhanced model that includes
+    source localization estimates, aligning with the advanced deep learning model requirements
+    for the deep-brain robotics project.
     """
     predictions = model.predict(data)
 
@@ -129,7 +193,10 @@ if __name__ == "__main__":
     csv_dir = 'Physionet EEGMMIDB in MATLAB structure and CSV files to leverage accessibility and exploitation/CSV files/'
     sample_file = 'SUB_001_SIG_01.csv'
     file_path = os.path.join(csv_dir, sample_file)
-    data = load_preprocessed_data(file_path)
+    data = load_preprocessed_data(file_path, labels)
+
+    # Example labels for CSP and LDA
+    labels = np.random.randint(0, 2, size=(data.shape[0],))
 
     # Create the deep learning model with dynamic input shape
     input_shape = data.shape[1:]
@@ -141,6 +208,8 @@ if __name__ == "__main__":
         "position": np.random.rand(data.shape[0], 2),
         "intensity": np.random.rand(data.shape[0])
     }
+
+    # TODO: Replace random labels with actual EEG data and corresponding hologram parameters
 
     # Train the model
     history = train_model(model, data, labels)
