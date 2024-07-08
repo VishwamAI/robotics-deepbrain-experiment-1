@@ -83,13 +83,14 @@ def generate_annotations(eeg_file, output_dir):
                                                             event_data = np.array(sub_dereferenced_data[:])
                                                             print(f"Event data: {event_data}")
                                                             print(f"Event data before assignment: {event_data}")
-                                                            if isinstance(event_data[2], h5py.Reference):
-                                                                try:
-                                                                    print(f"Dereferencing event_data[2]: {event_data[2]}")
-                                                                    event_data[2] = f[event_data[2]][()]
-                                                                    print(f"Dereferenced event_data[2]: {event_data[2]}")
-                                                                except Exception as e:
-                                                                    print(f"Error dereferencing event_data[2]: {e}")
+                                                            print(f"Type of event_data[2] before dereferencing: {type(event_data[2])}, value: {event_data[2]}")
+                                                            try:
+                                                                print(f"Dereferencing event_data[2]: {event_data[2]}")
+                                                                event_data[2] = f[event_data[2]][()]
+                                                                print(f"Dereferenced event_data[2]: {event_data[2]}")
+                                                            except Exception as e:
+                                                                print(f"Error dereferencing event_data[2]: {e}")
+                                                                print(f"Type of event_data[2] after error: {type(event_data[2])}, value: {event_data[2]}")
                                                             print(f"Event data[2] after dereferencing: {event_data[2]}")
                                                             print(f"Type of event_data[0]: {type(event_data[0])}, value: {event_data[0]}")
                                                             print(f"Type of event_data[1]: {type(event_data[1])}, value: {event_data[1]}")
