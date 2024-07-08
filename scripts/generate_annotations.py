@@ -45,12 +45,12 @@ def generate_annotations(eeg_file, output_dir):
                     stim_channel = 'STI 014'
                 else:
                     # Create a synthetic stim channel based on annotations
-                    annotations_key = subject + '_Annotations'
-                    if annotations_key not in f['EEGMMIDB']['Annotations'].keys():
+                    annotations_key = 'Annotations'
+                    if annotations_key not in f['EEGMMIDB'].keys():
                         print(f"Annotations key not found for subject: {subject}")
                         continue
 
-                    annotations_refs = f['EEGMMIDB']['Annotations'][annotations_key][0]
+                    annotations_refs = f['EEGMMIDB']['Annotations'][subject][0]
                     stim_data = np.zeros(raw_data.shape[1])
                     for ref in annotations_refs:
                         if isinstance(ref, h5py.Reference):
