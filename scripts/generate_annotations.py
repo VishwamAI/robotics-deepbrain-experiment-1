@@ -55,7 +55,11 @@ def generate_annotations(eeg_file, output_dir):
 
                     try:
                         annotations_refs = f['EEGMMIDB']['Annotations'][subject][0]
-                        stim_data = np.zeros(raw_data.shape[1])
+                        print(f"Annotations references for subject {subject}: {annotations_refs}")
+                        try:
+                            stim_data = np.zeros(raw_data.shape[1])
+                        except Exception as e:
+                            print(f"Error creating stim_data array: {e}")
                         for ref in annotations_refs:
                             if isinstance(ref, h5py.Reference):
                                 try:
@@ -73,7 +77,10 @@ def generate_annotations(eeg_file, output_dir):
                                                             print(f"Event data: {event_data}")
                                                             print(f"Event data before assignment: {event_data}")
                                                             if isinstance(event_data[2], h5py.Reference):
-                                                                event_data[2] = f[event_data[2]][()]
+                                                                try:
+                                                                    event_data[2] = f[event_data[2]][()]
+                                                                except Exception as e:
+                                                                    print(f"Error dereferencing event_data[2]: {e}")
                                                             print(f"Event data[2] after dereferencing: {event_data[2]}")
                                                             if not isinstance(event_data[2], (int, float)):
                                                                 raise ValueError(f"Unexpected data type for event_data[2]: {type(event_data[2])}")
