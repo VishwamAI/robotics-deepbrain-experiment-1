@@ -37,12 +37,14 @@ def eeg_measurement_model(state_vector, forward_matrix):
     EEG measurement model for the multicore BPF approach.
 
     Args:
-    state_vector (tf.Tensor): Current state vector (3D coordinates).
+    state_vector (tf.Tensor): Current state vector (num_particles, 3D coordinates).
     forward_matrix (tf.Tensor): Forward matrix for the head model.
 
     Returns:
     tf.Tensor: Predicted EEG measurements based on the state vector.
     """
+    # Ensure state_vector has the correct shape for matrix multiplication
+    state_vector = tf.reshape(state_vector, [-1, 3])
     predicted_measurements = tf.linalg.matmul(forward_matrix, tf.cast(state_vector, tf.float64))
     return predicted_measurements
 
@@ -107,6 +109,12 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
 
     This layer applies a state transition model, computes particle weights based on EEG measurements,
     resamples particles, and returns the mean of the resampled state vector as a single value output.
+
+    Args:
+    num_particles (int): Number of particles for the particle filter.
+    transition_matrix (np.ndarray): State transition matrix.
+    process_noise_cov (np.ndarray): Process noise covariance matrix.
+    forward_matrix (np.ndarray): Forward matrix for the head model (num_particles, 3).
     """
     def __init__(self, num_particles, transition_matrix, process_noise_cov, forward_matrix, **kwargs):
         super(MulticoreBPFLayer, self).__init__(**kwargs)
@@ -123,8 +131,11 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         # Apply the state transition model
         self.state_vector.assign(state_transition_model(self.state_vector, self.transition_matrix, self.process_noise_cov))
 
+        # Reshape state_vector to match the expected shape for matrix multiplication
+        reshaped_state_vector = tf.reshape(self.state_vector, [-1, 3])
+
         # Compute particle weights based on the EEG measurement model
-        predicted_measurements = eeg_measurement_model(self.state_vector, self.forward_matrix)
+        predicted_measurements = eeg_measurement_model(reshaped_state_vector, self.forward_matrix)
         self.particle_weights.assign(tf.reduce_sum(tf.square(inputs - predicted_measurements), axis=-1))
 
         # Resample particles based on weights
@@ -145,7 +156,7 @@ def create_deep_learning_model(input_shape, transition_matrix, process_noise_cov
     input_shape (tuple): Shape of the input data (timesteps, features).
     transition_matrix (np.ndarray): State transition matrix.
     process_noise_cov (np.ndarray): Process noise covariance matrix.
-    forward_matrix (np.ndarray): Forward matrix for the head model.
+    forward_matrix (np.ndarray): Forward matrix for the head model (num_particles, 3).
 
     Returns:
     tf.keras.Model: Compiled deep learning model that outputs a single continuous value per sample.
@@ -297,7 +308,7 @@ if __name__ == "__main__":
     process_noise_cov = np.eye(3) * 0.1  # Example process noise covariance matrix
 
     # Example forward matrix (replace with actual forward matrix)
-    forward_matrix = np.random.rand(64, 3)  # Example shape (channels, 3)
+    forward_matrix = np.random.rand(100, 3)  # Example shape (num_particles, 3)
 
     # Create the deep learning model with dynamic input shape
     input_shape = (1, data.shape[1])  # Ensure input shape is 2D: (1, features)
