@@ -104,6 +104,10 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         # Trim band_power_df to match the new number of trials
         band_power_df = band_power_df.iloc[:n_trials * n_channels]
 
+        # Ensure the length of the balanced labels array matches the number of samples in the trimmed band_power_df
+        if len(labels) != len(band_power_df):
+            raise ValueError("The length of the balanced labels array does not match the number of samples in the trimmed band_power_df.")
+
         # Log the labels array after trimming
         print(f"Labels after trimming: {labels}")
 
@@ -116,7 +120,11 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
             raise ValueError("The trimmed labels must contain at least two unique classes for CSP.")
         if len(unique_labels_after_trim) != len(unique_labels):
             raise ValueError(f"The number of unique labels after trimming ({len(unique_labels_after_trim)}) does not match the expected count ({len(unique_labels)}).")
+
         band_power_3d = band_power_df.values.reshape((n_trials, n_channels, -1))  # Reshape to (trials, channels, time)
+
+        # Trim the labels array to match the new number of trials
+        labels = labels[:n_trials]
 
         # Log the shapes of the reshaped data and labels
         print(f"Band power 3D shape: {band_power_3d.shape}")
