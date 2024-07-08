@@ -52,6 +52,6 @@ def process_annotations(annotation_dir, output_file):
     print(f"Labels processed and saved to {output_file}")
 
 if __name__ == "__main__":
-    annotation_dir = os.path.abspath('Physionet EEGMMIDB in MATLAB structure and CSV files to leverage accessibility and exploitation/CSV files/')
+    annotation_dir = os.path.abspath('/home/ubuntu/robotics-deepbrain-experiment-1/Physionet EEGMMIDB in MATLAB structure and CSV files to leverage accessibility and exploitation/CSV files')
     output_file = 'processed_labels.csv'
     process_annotations(annotation_dir, output_file)
