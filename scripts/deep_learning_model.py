@@ -159,11 +159,11 @@ def create_deep_learning_model(input_shape, transition_matrix, process_noise_cov
     model.add(tf.keras.layers.Masking(mask_value=0.0))
 
     # Convolutional layers for feature extraction
-    model.add(Conv1D(filters=64, kernel_size=3, activation='relu'))
+    model.add(Conv1D(filters=64, kernel_size=1, activation='relu'))
     model.add(MaxPooling1D(pool_size=2))
     model.add(Dropout(0.5))
 
-    model.add(Conv1D(filters=128, kernel_size=3, activation='relu'))
+    model.add(Conv1D(filters=128, kernel_size=1, activation='relu'))
     model.add(MaxPooling1D(pool_size=2))
     model.add(Dropout(0.5))
 
