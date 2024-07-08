@@ -83,6 +83,10 @@ def generate_annotations(eeg_file, output_dir):
                                                             event_data = np.array(sub_dereferenced_data[:])
                                                             print(f"Event data: {event_data}")
                                                             print(f"Event data before assignment: {event_data}")
+                                                            if len(event_data) < 3:
+                                                                print(f"Unexpected length of event_data: {len(event_data)}, value: {event_data}")
+                                                                raise ValueError(f"Unexpected length of event_data: {len(event_data)}")
+
                                                             print(f"Type of event_data[2] before dereferencing: {type(event_data[2])}, value: {event_data[2]}")
                                                             try:
                                                                 if isinstance(event_data[2], h5py.Reference):
@@ -94,10 +98,10 @@ def generate_annotations(eeg_file, output_dir):
                                                             except Exception as e:
                                                                 print(f"Error dereferencing event_data[2]: {e}")
                                                                 print(f"Type of event_data[2] after error: {type(event_data[2])}, value: {event_data[2]}")
+
                                                             print(f"Event data[2] after dereferencing: {event_data[2]}")
                                                             print(f"Type of event_data[0]: {type(event_data[0])}, value: {event_data[0]}")
                                                             print(f"Type of event_data[1]: {type(event_data[1])}, value: {event_data[1]}")
-                                                            print(f"Type of event_data[2]: {type(event_data[2])}, value: {event_data[2]}")
                                                             if not isinstance(event_data[2], (int, float)):
                                                                 print(f"Unexpected data type for event_data[2]: {type(event_data[2])}, value: {event_data[2]}")
                                                                 raise ValueError(f"Unexpected data type for event_data[2]: {type(event_data[2])}")
