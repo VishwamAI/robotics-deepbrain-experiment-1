@@ -48,8 +48,8 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         # Check for NaNs or infinite values in the initial sample data
         if sample_df.isnull().values.any() or np.isinf(sample_df.values).any():
             print("Initial sample data contains NaNs or infinite values. Handling them...")
-            sample_df = sample_df.fillna(0)  # Replace NaNs with 0
-            sample_df = sample_df.replace([np.inf, -np.inf], 0)  # Replace infinite values with 0
+            sample_df = sample_df.fillna(sample_df.mean())  # Replace NaNs with the mean of the column
+            sample_df = sample_df.replace([np.inf, -np.inf], sample_df.mean())  # Replace infinite values with the mean of the column
 
         # Ensure the labels match the sample data length
         if len(labels) < len(sample_df):
@@ -69,15 +69,15 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         # Check for NaNs or infinite values in the normalized data
         if normalized_df.isnull().values.any() or np.isinf(normalized_df.values).any():
             print("Normalized data contains NaNs or infinite values. Handling them...")
-            normalized_df = normalized_df.fillna(0)  # Replace NaNs with 0
-            normalized_df = normalized_df.replace([np.inf, -np.inf], 0)  # Replace infinite values with 0
+            normalized_df = normalized_df.fillna(normalized_df.mean())  # Replace NaNs with the mean of the column
+            normalized_df = normalized_df.replace([np.inf, -np.inf], normalized_df.mean())  # Replace infinite values with the mean of the column
 
         # Extract band power features
         bands = [(0.5, 4), (4, 8), (8, 12), (12, 30)]  # Example frequency bands
         band_power_features = []
         for band in bands:
             low, high = band
-            band_power = normalized_df.apply(lambda x: np.log(np.var(x[(x >= low) & (x <= high)]) + 1e-10), axis=1)
+            band_power = normalized_df.apply(lambda x: np.log(np.var(x[(x >= low) & (x <= high)]) + 1e-6), axis=1)
             band_power_features.append(band_power)
         band_power_df = pd.concat(band_power_features, axis=1)
 
@@ -87,8 +87,8 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         # Check for NaNs or infinite values in the band power features
         if band_power_df.isnull().values.any() or np.isinf(band_power_df.values).any():
             print("Band power features contain NaNs or infinite values. Handling them...")
-            band_power_df = band_power_df.fillna(0)  # Replace NaNs with 0
-            band_power_df = band_power_df.replace([np.inf, -np.inf], 0)  # Replace infinite values with 0
+            band_power_df = band_power_df.fillna(band_power_df.mean())  # Replace NaNs with the mean of the column
+            band_power_df = band_power_df.replace([np.inf, -np.inf], band_power_df.mean())  # Replace infinite values with the mean of the column
 
         # Ensure there are multiple unique labels
         unique_labels = np.unique(labels)
