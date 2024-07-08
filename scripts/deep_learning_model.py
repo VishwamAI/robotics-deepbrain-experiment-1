@@ -10,26 +10,23 @@ from sklearn.preprocessing import StandardScaler
 from mne.decoding import CSP
 from data_preprocessing import load_csv_data_in_chunks
 
-def state_transition_model(state_vector, transition_matrix, process_noise_cov):
+def state_transition_model(state_vectors, transition_matrix, process_noise_cov):
     """
     State transition model for the multicore BPF approach.
 
     Args:
-    state_vector (tf.Tensor): Current state vector (3D coordinates).
+    state_vectors (tf.Tensor): Current state vectors for all particles (num_particles, 3D coordinates).
     transition_matrix (tf.Tensor): State transition matrix.
     process_noise_cov (tf.Tensor): Process noise covariance matrix.
 
     Returns:
-    tf.Tensor: Updated state vector based on the state transition model.
+    tf.Tensor: Updated state vectors based on the state transition model.
     """
-    # Apply the state transition matrix
-    updated_state_vector = tf.linalg.matmul(transition_matrix, tf.cast(state_vector, tf.float64))
+    updated_state_vectors = tf.linalg.matmul(transition_matrix, tf.cast(state_vectors, tf.float64))
+    process_noise = tf.random.normal(shape=state_vectors.shape, mean=0.0, stddev=tf.sqrt(process_noise_cov))
+    updated_state_vectors += process_noise
 
-    # Add process noise
-    process_noise = tf.random.normal(shape=state_vector.shape, mean=0.0, stddev=tf.sqrt(process_noise_cov))
-    updated_state_vector += process_noise
-
-    return updated_state_vector
+    return updated_state_vectors
 
 def eeg_measurement_model(state_vector, forward_matrix):
     """
@@ -42,7 +39,7 @@ def eeg_measurement_model(state_vector, forward_matrix):
     Returns:
     tf.Tensor: Predicted EEG measurements based on the state vector.
     """
-    predicted_measurements = tf.linalg.matmul(forward_matrix, state_vector)
+    predicted_measurements = tf.linalg.matmul(forward_matrix, tf.cast(state_vector, tf.float64))
     return predicted_measurements
 
 def apply_spatial_filter(eeg_data, filter_matrices):
@@ -123,7 +120,7 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         self.state_vector.assign(state_transition_model(self.state_vector, self.transition_matrix, self.process_noise_cov))
 
         # Compute particle weights based on the EEG measurement model
-        predicted_measurements = eeg_measurement_model(self.state_vector, self.forward_matrix)
+        predicted_measurements = tf.stack([eeg_measurement_model(state_vector, self.forward_matrix) for state_vector in self.state_vector])
         self.particle_weights.assign(tf.reduce_sum(tf.square(inputs - predicted_measurements), axis=-1))
 
         # Resample particles based on weights
