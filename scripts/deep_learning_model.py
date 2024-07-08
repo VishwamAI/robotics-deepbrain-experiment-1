@@ -120,7 +120,7 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         self.state_vector.assign(state_transition_model(self.state_vector, self.transition_matrix, self.process_noise_cov))
 
         # Compute particle weights based on the EEG measurement model
-        predicted_measurements = tf.stack([eeg_measurement_model(state_vector, self.forward_matrix) for state_vector in self.state_vector])
+        predicted_measurements = eeg_measurement_model(self.state_vector, self.forward_matrix)
         self.particle_weights.assign(tf.reduce_sum(tf.square(inputs - predicted_measurements), axis=-1))
 
         # Resample particles based on weights
