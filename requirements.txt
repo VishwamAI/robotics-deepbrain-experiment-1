@@ -71,7 +71,7 @@ ml-dtypes==0.2.0
 more-itertools==8.10.0
 namex==0.0.8
 netifaces==0.11.0
-numpy==1.26.4
+numpy==1.26.3
 oauthlib==3.2.0
 olefile==0.46
 opencv-python-headless==4.10.0.84
