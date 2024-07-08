@@ -45,6 +45,12 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         # Trim the sample data to the desired sample size
         sample_df = sample_df.head(sample_size)
 
+        # Check for NaNs or infinite values in the initial sample data
+        if sample_df.isnull().values.any() or np.isinf(sample_df.values).any():
+            print("Initial sample data contains NaNs or infinite values. Handling them...")
+            sample_df = sample_df.fillna(0)  # Replace NaNs with 0
+            sample_df = sample_df.replace([np.inf, -np.inf], 0)  # Replace infinite values with 0
+
         # Ensure the labels match the sample data length
         if len(labels) < len(sample_df):
             labels = np.resize(labels, len(sample_df))
@@ -60,6 +66,12 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         normalized_data = scaler.fit_transform(sample_df)
         normalized_df = pd.DataFrame(normalized_data, columns=sample_df.columns)
 
+        # Check for NaNs or infinite values in the normalized data
+        if normalized_df.isnull().values.any() or np.isinf(normalized_df.values).any():
+            print("Normalized data contains NaNs or infinite values. Handling them...")
+            normalized_df = normalized_df.fillna(0)  # Replace NaNs with 0
+            normalized_df = normalized_df.replace([np.inf, -np.inf], 0)  # Replace infinite values with 0
+
         # Extract band power features
         bands = [(0.5, 4), (4, 8), (8, 12), (12, 30)]  # Example frequency bands
         band_power_features = []
@@ -68,6 +80,12 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
             band_power = normalized_df.apply(lambda x: np.log(np.var(x[(x >= low) & (x <= high)]) + 1e-10), axis=1)
             band_power_features.append(band_power)
         band_power_df = pd.concat(band_power_features, axis=1)
+
+        # Check for NaNs or infinite values in the band power features
+        if band_power_df.isnull().values.any() or np.isinf(band_power_df.values).any():
+            print("Band power features contain NaNs or infinite values. Handling them...")
+            band_power_df = band_power_df.fillna(0)  # Replace NaNs with 0
+            band_power_df = band_power_df.replace([np.inf, -np.inf], 0)  # Replace infinite values with 0
 
         # Ensure there are multiple unique labels
         unique_labels = np.unique(labels)
@@ -132,14 +150,17 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         print(f"Number of trials: {n_trials}")
         print(f"Unique labels after trimming: {unique_labels_after_trim}")
 
+        # Check for NaNs or infinite values in the data
+        if np.any(np.isnan(band_power_3d)) or np.any(np.isinf(band_power_3d)):
+            raise ValueError("band_power_3d contains NaNs or infinite values.")
+
         # Apply CSP
         csp = CSP(n_components=4)
         csp_features = csp.fit_transform(band_power_3d, labels)
-        csp_df = pd.DataFrame(csp_features)
 
         # Reduce dimensionality
         pca = PCA(n_components=10)
-        reduced_data = pca.fit_transform(csp_df)
+        reduced_data = pca.fit_transform(csp_features)
         reduced_df = pd.DataFrame(reduced_data)
 
         # Save the generated sample data
