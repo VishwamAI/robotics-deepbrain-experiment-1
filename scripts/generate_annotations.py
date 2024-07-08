@@ -22,6 +22,7 @@ def generate_annotations(eeg_file, output_dir):
 
         # Load the EEG data from MATLAB file using h5py
         with h5py.File(eeg_file, 'r') as f:
+            print(f"Keys in HDF5 file: {list(f.keys())}")
             if 'EEGMMIDB' not in f.keys() or 'Signal' not in f['EEGMMIDB'].keys():
                 raise KeyError("Expected keys 'EEGMMIDB' or 'Signal' not found in the HDF5 file.")
 
