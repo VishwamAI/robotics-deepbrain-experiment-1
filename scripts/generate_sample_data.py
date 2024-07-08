@@ -18,6 +18,10 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
 
     Returns:
     None
+
+    Note:
+    This function handles NaNs and infinite values in the data by replacing them with the mean of the respective column.
+    It also ensures that the labels array does not contain NaNs or infinite values after trimming.
     """
     try:
         # Initialize an empty DataFrame to store the sample data
@@ -87,8 +91,10 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         # Check for NaNs or infinite values in the band power features
         if band_power_df.isnull().values.any() or np.isinf(band_power_df.values).any():
             print("Band power features contain NaNs or infinite values. Handling them...")
-            band_power_df = band_power_df.apply(lambda x: x.fillna(x.mean()))  # Replace NaNs with the mean of the column
-            band_power_df = band_power_df.apply(lambda x: x.replace([np.inf, -np.inf], x.mean()))  # Replace infinite values with the mean of the column
+            band_power_df = band_power_df.apply(lambda x: x.fillna(x.mean()) if not np.isnan(x.mean()) else x.fillna(0))  # Replace NaNs with the mean of the column, or 0 if the mean is NaN
+            band_power_df = band_power_df.apply(lambda x: x.replace([np.inf, -np.inf], x.mean()) if not np.isnan(x.mean()) else x.replace([np.inf, -np.inf], 0))  # Replace infinite values with the mean of the column, or 0 if the mean is NaN
+        if band_power_df.isnull().values.any() or np.isinf(band_power_df.values).any():
+            raise ValueError("band_power_df still contains NaNs or infinite values after handling.")
 
         # Ensure there are multiple unique labels
         unique_labels = np.unique(labels)
@@ -145,13 +151,23 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         band_power_3d = band_power_df.values.reshape((n_trials, n_channels, -1))  # Reshape to (trials, channels, time)
 
         # Handle NaNs and infinite values in the reshaped 3D array
-        band_power_3d = np.where(np.isnan(band_power_3d), np.nanmean(band_power_3d, axis=(0, 1)), band_power_3d)
-        band_power_3d = np.where(np.isinf(band_power_3d), np.nanmean(band_power_3d, axis=(0, 1)), band_power_3d)
-        # Fallback strategy for cases where np.nanmean returns NaN
-        band_power_3d = np.nan_to_num(band_power_3d, nan=np.nanmean(band_power_3d, axis=(0, 1)))
+        band_power_3d = np.where(np.isnan(band_power_3d), np.nanmean(band_power_3d, axis=(0, 1), keepdims=True), band_power_3d)  # axis=(0, 1) means averaging over trials and channels
+        band_power_3d = np.where(np.isinf(band_power_3d), np.nanmean(band_power_3d, axis=(0, 1), keepdims=True), band_power_3d)  # axis=(0, 1) means averaging over trials and channels
+        # Ensure fallback_value is not NaN before using it in np.nan_to_num
+        fallback_value = np.nanmean(band_power_3d, axis=(0, 1), keepdims=True)  # axis=(0, 1) means averaging over trials and channels
+        if np.isnan(fallback_value).all():
+            fallback_value = 0  # Use 0 as a fallback value if np.nanmean returns NaN
+        band_power_3d = np.nan_to_num(band_power_3d, nan=fallback_value, posinf=fallback_value, neginf=fallback_value)
+
+        # Log the min, max, and mean values of the band power 3D array after handling NaNs and infinite values
+        print(f"Band power 3D - min: {band_power_3d.min()}, max: {band_power_3d.max()}, mean: {band_power_3d.mean()}")
 
         # Trim the labels array to match the new number of trials
         labels = labels[:n_trials]
+
+        # Check for NaN or invalid values in the labels array after trimming
+        if np.any(np.isnan(labels)) or np.any(np.isinf(labels)):
+            raise ValueError("Labels array contains NaNs or infinite values after trimming.")
 
         # Log the shapes of the reshaped data and labels
         print(f"Band power 3D shape: {band_power_3d.shape}")
@@ -168,7 +184,7 @@ def generate_sample_data(input_dir, output_file, labels_file, sample_size=1000, 
         csp_features = csp.fit_transform(band_power_3d, labels)
 
         # Reduce dimensionality
-        pca = PCA(n_components=10)
+        pca = PCA(n_components=4)
         reduced_data = pca.fit_transform(csp_features)
         reduced_df = pd.DataFrame(reduced_data)
 
