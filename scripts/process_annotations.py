@@ -19,10 +19,15 @@ def process_annotations(annotation_dir, output_file):
         print(f"Error: The directory {annotation_dir} does not exist.")
         return
 
+    # Print the current working directory
+    print(f"Current working directory: {os.getcwd()}")
+
     # Iterate over annotation files in the directory
     annotation_files_found = False
     for filename in os.listdir(annotation_dir):
-        if filename.endswith("_ANN.csv"):
+        full_path = os.path.join(annotation_dir, filename)
+        print(f"Checking file: {full_path}")
+        if filename.lower().endswith("_ann.csv"):
             annotation_files_found = True
             file_path = os.path.join(annotation_dir, filename)
             ann_df = pd.read_csv(file_path, header=None)
