@@ -16,7 +16,7 @@ charset-normalizer==3.3.2
 click==8.0.3
 # Removed cloud-init==23.3.3 as it is not available in PyPI and is a system-level package
 colorama==0.4.4
-command-not-found==0.3
+# Removed command-not-found==0.3 as it is not available in PyPI and is a system-level package
 configobj==5.0.6
 constantly==15.1.0
 contourpy==1.2.0
