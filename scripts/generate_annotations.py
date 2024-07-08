@@ -94,7 +94,10 @@ def generate_annotations(eeg_file, output_dir):
                                                             if not isinstance(event_data[0], (int, float)) or not isinstance(event_data[1], (int, float)):
                                                                 raise ValueError(f"Unexpected data type for event_data[0] or event_data[1]: {type(event_data[0])}, {type(event_data[1])}")
                                                             print(f"Assigning event_data[2] to stim_data[{int(event_data[0])}:{int(event_data[1])}]")
-                                                            stim_data[int(event_data[0]):int(event_data[1])] = event_data[2]
+                                                            try:
+                                                                stim_data[int(event_data[0]):int(event_data[1])] = event_data[2]
+                                                            except Exception as e:
+                                                                print(f"Error assigning event_data[2] to stim_data: {e}")
                                                     except Exception as e:
                                                         print(f"Error dereferencing actual_ref: {e}")
                                 except Exception as e:
