@@ -5,8 +5,15 @@ from deep_learning_model import create_deep_learning_model, load_preprocessed_da
 from image_processing import load_image, preprocess_image, generate_hologram
 from data_preprocessing import load_csv_data_in_chunks, normalize_data, segment_data
 
+# Initialize the transition matrix and process noise covariance matrix
+transition_matrix = np.eye(3)  # Example transition matrix (identity matrix)
+process_noise_cov = np.eye(3) * 0.1  # Example process noise covariance matrix
+
+# Example forward matrix (replace with actual forward matrix)
+forward_matrix = np.random.rand(100, 3)  # Example shape (num_particles, 3)
+
 # Create the deep learning model
-model = create_deep_learning_model((128, 64))
+model = create_deep_learning_model((128, 64), transition_matrix, process_noise_cov, forward_matrix)
 model.summary()
 
 # Load preprocessed EEG data
