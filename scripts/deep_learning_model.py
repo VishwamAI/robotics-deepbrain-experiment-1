@@ -161,6 +161,7 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
 
         # Reshape inputs to match the shape of predicted_measurements
         reshaped_inputs = tf.reshape(inputs, [input_shape[0], predicted_shape[0], predicted_shape[1]])
+        reshaped_inputs = tf.transpose(reshaped_inputs, perm=[0, 2, 1])  # Transpose to match the expected shape
         tf.print("Shape of reshaped_inputs:", tf.shape(reshaped_inputs))
 
         self.particle_weights.assign(tf.reduce_sum(tf.square(reshaped_inputs - tf.transpose(predicted_measurements)), axis=-1))
@@ -219,7 +220,7 @@ def create_deep_learning_model(input_shape, transition_matrix, process_noise_cov
     model.add(MulticoreBPFLayer(num_particles=100, transition_matrix=transition_matrix, process_noise_cov=process_noise_cov, forward_matrix=forward_matrix))
 
     # Output layer for source locations (3D coordinates) and waveforms
-    model.add(Dense(1, activation='linear'))  # Change output layer to produce 1 value per sample with linear activation
+    model.add(Dense(3, activation='linear'))  # Change output layer to produce 3 values per sample with linear activation
 
     # Compile the model
     model.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error', metrics=[])
