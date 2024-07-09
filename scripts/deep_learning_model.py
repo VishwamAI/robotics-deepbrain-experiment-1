@@ -47,6 +47,8 @@ def eeg_measurement_model(state_vector, forward_matrix):
     state_vector = tf.reshape(state_vector, [-1, 3])
     # Transpose state_vector for correct matrix multiplication
     state_vector = tf.transpose(state_vector)
+    # Cast forward_matrix to tf.float32 to match state_vector
+    forward_matrix = tf.cast(forward_matrix, tf.float32)
     predicted_measurements = tf.linalg.matmul(forward_matrix, state_vector)
     return tf.cast(predicted_measurements, tf.float32)
 
