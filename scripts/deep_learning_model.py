@@ -139,8 +139,7 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         self.state_vector.assign(state_transition_model(self.state_vector, self.transition_matrix, self.process_noise_cov))
 
         # Reshape state_vector to match the expected shape for matrix multiplication
-        reshaped_state_vector = tf.reshape(self.state_vector, [3, -1])  # Reshape to (3, num_particles)
-        reshaped_state_vector = tf.transpose(reshaped_state_vector)  # Transpose to (num_particles, 3)
+        reshaped_state_vector = tf.reshape(self.state_vector, [self.num_particles, 3])  # Reshape to (num_particles, 3)
 
         # Compute particle weights based on the EEG measurement model
         predicted_measurements = tf.cast(eeg_measurement_model(reshaped_state_vector, self.forward_matrix), tf.float32)
