@@ -166,14 +166,14 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
             tf.print("Dimension mismatch: reshaped inputs shape", input_shape[1:], "does not match predicted_measurements shape", predicted_shape)
             raise ValueError(f"Dimension mismatch: reshaped inputs shape {input_shape[1:]} does not match predicted_measurements shape {predicted_shape}")
 
-        reshaped_inputs = tf.reshape(inputs, [input_shape[0], predicted_shape[1], predicted_shape[0]])
+        reshaped_inputs = tf.reshape(inputs, [input_shape[0], predicted_shape[0], predicted_shape[1]])
         tf.print("Shape of reshaped_inputs:", tf.shape(reshaped_inputs))
 
         # Ensure reshaped_inputs and predicted_measurements are compatible for element-wise subtraction
-        if reshaped_inputs.shape != tf.transpose(predicted_measurements).shape:
-            raise ValueError(f"Shape mismatch: reshaped_inputs shape {reshaped_inputs.shape} does not match transposed predicted_measurements shape {tf.transpose(predicted_measurements).shape}")
+        if reshaped_inputs.shape != predicted_measurements.shape:
+            raise ValueError(f"Shape mismatch: reshaped_inputs shape {reshaped_inputs.shape} does not match predicted_measurements shape {predicted_measurements.shape}")
 
-        self.particle_weights.assign(tf.reduce_sum(tf.square(reshaped_inputs - tf.transpose(predicted_measurements)), axis=-1))
+        self.particle_weights.assign(tf.reduce_sum(tf.square(reshaped_inputs - predicted_measurements), axis=-1))
 
         # Resample particles based on weights
         resampled_indices = tf.random.categorical(tf.math.log(tf.expand_dims(self.particle_weights, 0)), self.num_particles)
