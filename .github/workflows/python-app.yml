@@ -24,6 +24,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libdbus-1-dev
+        sudo apt-get install -y gobject-introspection
 
     - name: Install Python dependencies
       run: |
