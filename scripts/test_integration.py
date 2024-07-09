@@ -17,7 +17,8 @@ model = create_deep_learning_model((128, 64), transition_matrix, process_noise_c
 model.summary()
 
 # Load preprocessed EEG data
-csv_dir = 'datasets/'  # Corrected directory path
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+csv_dir = os.path.join(base_dir, 'datasets')  # Use absolute path for the datasets directory
 sample_file = 'SUB_001_SIG_01.csv'
 file_path = os.path.join(csv_dir, sample_file)
 data = load_csv_data_in_chunks(file_path)
