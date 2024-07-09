@@ -157,7 +157,7 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
 
         # Ensure the total number of elements in inputs matches predicted_measurements
         if tf.reduce_prod(input_shape[1:]) != tf.reduce_prod(predicted_shape):
-            raise ValueError(f"Dimension mismatch: reshaped inputs size {tf.reduce_prod(input_shape[1:])} does not match predicted_measurements size {tf.reduce_prod(predicted_shape)}")
+            raise ValueError(f"Dimension mismatch: reshaped inputs shape {input_shape[1:]} does not match predicted_measurements shape {predicted_shape}")
 
         # Reshape inputs to match the shape of predicted_measurements
         reshaped_inputs = tf.reshape(inputs, [input_shape[0], predicted_shape[0], predicted_shape[1]])
