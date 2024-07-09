@@ -10,7 +10,7 @@ transition_matrix = np.eye(3)  # Example transition matrix (identity matrix)
 process_noise_cov = np.eye(3) * 0.1  # Example process noise covariance matrix
 
 # Example forward matrix (replace with actual forward matrix)
-forward_matrix = np.random.rand(100, 3)  # Example shape (num_particles, 3)
+forward_matrix = np.random.rand(100, 3).astype(np.float64)  # Example shape (num_particles, 3) and cast to float64
 
 # Create the deep learning model
 model = create_deep_learning_model((128, 64), transition_matrix, process_noise_cov, forward_matrix)
