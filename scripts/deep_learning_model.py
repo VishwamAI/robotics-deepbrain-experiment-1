@@ -47,8 +47,8 @@ def eeg_measurement_model(state_vector, forward_matrix):
     state_vector = tf.reshape(state_vector, [-1, 3])
     # Transpose state_vector for correct matrix multiplication
     state_vector = tf.transpose(state_vector)
-    predicted_measurements = tf.linalg.matmul(forward_matrix, tf.cast(state_vector, tf.float64))
-    return predicted_measurements
+    predicted_measurements = tf.linalg.matmul(forward_matrix, state_vector)
+    return tf.cast(predicted_measurements, tf.float32)
 
 def apply_spatial_filter(eeg_data, filter_matrices):
     """
@@ -139,7 +139,7 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         reshaped_state_vector = tf.transpose(reshaped_state_vector)  # Transpose state_vector for correct matrix multiplication
 
         # Compute particle weights based on the EEG measurement model
-        predicted_measurements = eeg_measurement_model(reshaped_state_vector, self.forward_matrix)
+        predicted_measurements = tf.cast(eeg_measurement_model(reshaped_state_vector, self.forward_matrix), tf.float32)
         self.particle_weights.assign(tf.reduce_sum(tf.square(inputs - predicted_measurements), axis=-1))
 
         # Resample particles based on weights
