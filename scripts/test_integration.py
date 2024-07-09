@@ -56,6 +56,10 @@ if data is not None:
     print("Predictions type:", type(predictions))
     print("Predictions:", predictions)
 
+    # Add assertions to validate outcomes
+    assert predictions.shape[0] == data.shape[0], "Mismatch in number of predictions and input data samples"
+    assert predictions.shape[1] == 3, "Predictions should have 3 columns for position and intensity"
+
     # Load and preprocess a sample image
     image_path = "/home/ubuntu/browser_downloads/codioful-formerly-gradienta-7E5kq_sW0Ew-unsplash.jpg"
     try:
