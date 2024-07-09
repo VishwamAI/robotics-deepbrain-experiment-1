@@ -160,7 +160,7 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
             raise ValueError(f"Dimension mismatch: reshaped inputs shape {input_shape[1:]} does not match predicted_measurements shape {predicted_shape}")
 
         # Reshape inputs to match the shape of predicted_measurements
-        reshaped_inputs = tf.reshape(inputs, [input_shape[0], predicted_shape[1], input_shape[1]])
+        reshaped_inputs = tf.reshape(inputs, [input_shape[0], input_shape[1], predicted_shape[1]])
         reshaped_inputs = tf.transpose(reshaped_inputs, perm=[0, 2, 1])  # Transpose to match the expected shape
         tf.print("Shape of reshaped_inputs:", tf.shape(reshaped_inputs))
 
