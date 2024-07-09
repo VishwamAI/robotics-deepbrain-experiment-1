@@ -17,7 +17,7 @@ model = create_deep_learning_model((128, 64), transition_matrix, process_noise_c
 model.summary()
 
 # Load preprocessed EEG data
-csv_dir = 'Physionet EEGMMIDB in MATLAB structure and CSV files to leverage accessibility and exploitation/CSV files/'
+csv_dir = 'datasets/'  # Corrected directory path
 sample_file = 'SUB_001_SIG_01.csv'
 file_path = os.path.join(csv_dir, sample_file)
 data = load_csv_data_in_chunks(file_path)
