@@ -146,6 +146,7 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
 
         # Print shapes for debugging
         tf.print("Shape of inputs:", tf.shape(inputs))
+        tf.print("Shape of reshaped_state_vector:", tf.shape(reshaped_state_vector))
         tf.print("Shape of predicted_measurements:", tf.shape(predicted_measurements))
         tf.print("Inputs:", inputs)
         tf.print("Predicted measurements:", predicted_measurements)
@@ -158,6 +159,7 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
 
         # Reshape inputs to match the shape of predicted_measurements
         reshaped_inputs = tf.reshape(inputs, predicted_shape)
+        tf.print("Shape of reshaped_inputs:", tf.shape(reshaped_inputs))
 
         self.particle_weights.assign(tf.reduce_sum(tf.square(reshaped_inputs - predicted_measurements), axis=-1))
 
