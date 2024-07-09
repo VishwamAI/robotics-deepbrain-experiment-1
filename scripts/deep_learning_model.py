@@ -140,14 +140,14 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
 
         # Reshape state_vector to match the expected shape for matrix multiplication
         reshaped_state_vector = tf.reshape(self.state_vector, [self.num_particles, 3])  # Reshape to (num_particles, 3)
-        tf.print("Shape of reshaped_state_vector:", tf.shape(reshaped_state_vector))
+        tf.print("Shape of reshaped_state_vector:", tf.shape(reshaped_state_vector).numpy())
 
         # Compute particle weights based on the EEG measurement model
         predicted_measurements = tf.cast(eeg_measurement_model(reshaped_state_vector, self.forward_matrix), tf.float32)
-        tf.print("Shape of predicted_measurements:", tf.shape(predicted_measurements))
+        tf.print("Shape of predicted_measurements:", tf.shape(predicted_measurements).numpy())
 
         # Print shapes for debugging
-        tf.print("Shape of inputs:", tf.shape(inputs))
+        tf.print("Shape of inputs:", tf.shape(inputs).numpy())
         tf.print("Inputs:", inputs)
         tf.print("Predicted measurements:", predicted_measurements)
 
@@ -156,12 +156,12 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
 
         # Ensure the total number of elements in inputs matches predicted_measurements
         if tf.reduce_prod(input_shape[1:]) != tf.reduce_prod(predicted_shape):
-            tf.print("Dimension mismatch: reshaped inputs shape", input_shape[1:], "does not match predicted_measurements shape", predicted_shape)
-            raise ValueError(f"Dimension mismatch: reshaped inputs shape {input_shape[1:]} does not match predicted_measurements shape {predicted_shape}")
+            tf.print("Dimension mismatch: reshaped inputs shape", input_shape[1:].numpy(), "does not match predicted_measurements shape", predicted_shape.numpy())
+            raise ValueError(f"Dimension mismatch: reshaped inputs shape {input_shape[1:].numpy()} does not match predicted_measurements shape {predicted_shape.numpy()}")
 
         # Reshape inputs to match the shape of predicted_measurements
         reshaped_inputs = tf.reshape(inputs, [input_shape[0], predicted_shape[0], predicted_shape[1]])
-        tf.print("Shape of reshaped_inputs:", tf.shape(reshaped_inputs))
+        tf.print("Shape of reshaped_inputs:", tf.shape(reshaped_inputs).numpy())
 
         self.particle_weights.assign(tf.reduce_sum(tf.square(reshaped_inputs - tf.transpose(predicted_measurements)), axis=-1))
 
