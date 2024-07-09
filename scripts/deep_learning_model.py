@@ -147,6 +147,8 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         # Print shapes for debugging
         tf.print("Shape of inputs:", tf.shape(inputs))
         tf.print("Shape of predicted_measurements:", tf.shape(predicted_measurements))
+        tf.print("Inputs:", inputs)
+        tf.print("Predicted measurements:", predicted_measurements)
 
         # Ensure the total number of elements in inputs matches predicted_measurements
         input_shape = tf.shape(inputs)
