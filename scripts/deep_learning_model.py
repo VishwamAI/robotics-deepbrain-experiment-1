@@ -133,6 +133,7 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         self.state_vector = self.add_weight(shape=(self.num_particles, 3), initializer='random_normal', trainable=False, name='state_vector')
         self.particle_weights = self.add_weight(shape=(self.num_particles,), initializer='ones', trainable=False, name='particle_weights')
 
+    @tf.function
     def call(self, inputs):
         # Apply the state transition model
         self.state_vector.assign(state_transition_model(self.state_vector, self.transition_matrix, self.process_noise_cov))
