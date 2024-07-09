@@ -66,6 +66,7 @@ markdown-it-py
 MarkupSafe
 matplotlib
 mdurl
+mne
 ml-dtypes
 more-itertools
 namex
