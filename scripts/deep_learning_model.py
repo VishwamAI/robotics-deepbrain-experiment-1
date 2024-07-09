@@ -150,6 +150,8 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         tf.print("Shape of inputs:", tf.shape(inputs))
         tf.print("Inputs:", inputs)
         tf.print("Predicted measurements:", predicted_measurements)
+        tf.print("Shape of forward_matrix:", tf.shape(self.forward_matrix))
+        tf.print("Shape of state_vector:", tf.shape(self.state_vector))
 
         input_shape = tf.shape(inputs)
         predicted_shape = tf.shape(predicted_measurements)
