@@ -37,7 +37,7 @@ def eeg_measurement_model(state_vector, forward_matrix):
     EEG measurement model for the multicore BPF approach.
 
     Args:
-    state_vector (tf.Tensor): Current state vector (num_particles, 3D coordinates).
+    state_vector (tf.Tensor): Current state vector (num_particles, 3D coordinates), reshaped to (3, num_particles).
     forward_matrix (tf.Tensor): Forward matrix for the head model.
 
     Returns:
@@ -45,6 +45,8 @@ def eeg_measurement_model(state_vector, forward_matrix):
     """
     # Ensure state_vector has the correct shape for matrix multiplication
     state_vector = tf.reshape(state_vector, [-1, 3])
+    # Transpose state_vector for correct matrix multiplication
+    state_vector = tf.transpose(state_vector)
     predicted_measurements = tf.linalg.matmul(forward_matrix, tf.cast(state_vector, tf.float64))
     return predicted_measurements
 
@@ -114,7 +116,8 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
     num_particles (int): Number of particles for the particle filter.
     transition_matrix (np.ndarray): State transition matrix.
     process_noise_cov (np.ndarray): Process noise covariance matrix.
-    forward_matrix (np.ndarray): Forward matrix for the head model (num_particles, 3).
+    forward_matrix (np.ndarray): Forward matrix for the head model.
+    state_vector (np.ndarray): State vector for the particles, reshaped to (3, num_particles) in the call method.
     """
     def __init__(self, num_particles, transition_matrix, process_noise_cov, forward_matrix, **kwargs):
         super(MulticoreBPFLayer, self).__init__(**kwargs)
@@ -133,6 +136,7 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
 
         # Reshape state_vector to match the expected shape for matrix multiplication
         reshaped_state_vector = tf.reshape(self.state_vector, [-1, 3])
+        reshaped_state_vector = tf.transpose(reshaped_state_vector)  # Transpose state_vector for correct matrix multiplication
 
         # Compute particle weights based on the EEG measurement model
         predicted_measurements = eeg_measurement_model(reshaped_state_vector, self.forward_matrix)
