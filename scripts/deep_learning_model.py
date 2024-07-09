@@ -67,9 +67,10 @@ def apply_spatial_filter(eeg_data, filter_matrices):
     if filter_matrices.shape[0] != num_timesteps or filter_matrices.shape[1] != num_channels:
         raise ValueError("The shape of the filter matrices must match the shape of the EEG data.")
 
-    filtered_data = tf.zeros_like(eeg_data)
-    for t in range(num_timesteps):
-        filtered_data[t, :] = tf.linalg.matmul(filter_matrices[t], eeg_data[t, :])
+    def apply_filter(t):
+        return tf.linalg.matmul(filter_matrices[t], eeg_data[t, :])
+
+    filtered_data = tf.map_fn(apply_filter, tf.range(num_timesteps), dtype=tf.float32)
 
     return filtered_data
 
