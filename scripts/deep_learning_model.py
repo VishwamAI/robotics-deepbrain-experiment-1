@@ -147,14 +147,15 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         tf.print("Shape of predicted_measurements:", tf.shape(predicted_measurements))
 
         # Print shapes for debugging
-        tf.print("Shape of inputs:", tf.shape(inputs))
-        tf.print("Inputs:", inputs)
-        tf.print("Predicted measurements:", predicted_measurements)
-        tf.print("Shape of forward_matrix:", tf.shape(self.forward_matrix))
-        tf.print("Shape of state_vector:", tf.shape(self.state_vector))
+        tf.print("Shape of inputs:", tf.shape(inputs).numpy())
+        tf.print("Inputs:", inputs, summarize=-1)
+        tf.print("Shape of predicted_measurements:", tf.shape(predicted_measurements).numpy())
+        tf.print("Predicted measurements:", predicted_measurements, summarize=-1)
+        tf.print("Shape of forward_matrix:", tf.shape(self.forward_matrix).numpy())
+        tf.print("Shape of state_vector:", tf.shape(self.state_vector).numpy())
 
-        input_shape = tf.shape(inputs)
-        predicted_shape = tf.shape(predicted_measurements)
+        input_shape = tf.shape(inputs).numpy()
+        predicted_shape = tf.shape(predicted_measurements).numpy()
 
         # Log the actual values of the shapes for debugging
         tf.print("Actual input shape:", input_shape)
