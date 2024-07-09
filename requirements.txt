@@ -22,7 +22,6 @@ constantly
 contourpy
 cryptography
 cycler
-dbus-python
 distro
 # Removed distro-info as it is not available in PyPI and is a system-level package
 docker
@@ -70,7 +69,6 @@ mdurl
 ml-dtypes
 more-itertools
 namex
-netifaces
 numpy
 oauthlib
 olefile
@@ -134,8 +132,7 @@ Twisted
 typing_extensions
 tzdata
 tzlocal
-ubuntu-advantage-tools
-ufw
+# Removed ubuntu-advantage-tools as it is not available in PyPI and is a system-level package
 urllib3
 validators
 wadllib
