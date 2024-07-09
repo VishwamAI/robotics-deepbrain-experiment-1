@@ -149,12 +149,13 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         tf.print("Shape of predicted_measurements:", tf.shape(predicted_measurements))
 
         # Ensure the total number of elements in inputs matches predicted_measurements
-        reshaped_inputs = tf.reshape(inputs, tf.shape(predicted_measurements))
-        if tf.size(reshaped_inputs) != tf.size(predicted_measurements):
-            raise ValueError(f"Dimension mismatch: reshaped inputs size {tf.size(reshaped_inputs)} does not match predicted_measurements size {tf.size(predicted_measurements)}")
+        input_shape = tf.shape(inputs)
+        predicted_shape = tf.shape(predicted_measurements)
+        if tf.reduce_prod(input_shape[1:]) != tf.reduce_prod(predicted_shape):
+            raise ValueError(f"Dimension mismatch: reshaped inputs size {tf.reduce_prod(input_shape[1:])} does not match predicted_measurements size {tf.reduce_prod(predicted_shape)}")
 
         # Reshape inputs to match the shape of predicted_measurements
-        reshaped_inputs = tf.reshape(inputs, tf.shape(predicted_measurements))
+        reshaped_inputs = tf.reshape(inputs, predicted_shape)
 
         self.particle_weights.assign(tf.reduce_sum(tf.square(reshaped_inputs - predicted_measurements), axis=-1))
 
