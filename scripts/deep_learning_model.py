@@ -145,6 +145,10 @@ class MulticoreBPFLayer(tf.keras.layers.Layer):
         # Compute particle weights based on the EEG measurement model
         predicted_measurements = tf.cast(eeg_measurement_model(reshaped_state_vector, self.forward_matrix), tf.float32)
 
+        # Print shapes for debugging
+        tf.print("Shape of inputs:", tf.shape(inputs))
+        tf.print("Shape of predicted_measurements:", tf.shape(predicted_measurements))
+
         # Ensure the total number of elements in inputs matches predicted_measurements
         reshaped_inputs = tf.reshape(inputs, tf.shape(predicted_measurements))
         if tf.size(reshaped_inputs) != tf.size(predicted_measurements):
